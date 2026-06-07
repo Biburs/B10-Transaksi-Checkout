@@ -1,0 +1,243 @@
+<!-- Fungsi: Daftar permintaan milik pegawai dengan search, filter, pagination-->
+
+<%- include('../partials/head', { title: title }) %>
+
+<body class="bg-background">
+  <%- include('../partials/sidebar', { user: user, userRole: userRole, activeMenu: 'permintaan' }) %>
+
+  <main id="content">
+    <%- include('../partials/topbar', {
+      pageTitle: 'Permintaan Saya',
+      pageSubtitle: 'Daftar permintaan barang yang Anda ajukan'
+    }) %>
+
+    <div class="p-6 space-y-6">
+
+      <!-- ===== Bar Aksi (Search + Filter + Tombol Buat) ===== -->
+      <div class="card p-4">
+        <form method="GET" action="/permintaan" class="flex flex-wrap items-end gap-3">
+
+          <!-- Search -->
+          <div class="flex-1 min-w-[200px]">
+           <label for="search" class="label mb-2">Cari</label>
+            <input
+              type="text"
+              id="search"
+              name="search"
+              class="input w-full"
+              placeholder="Nomor permintaan atau nama barang..."
+              value="<%= search %>"
+            />
+          </div>
+
+          <!-- Filter Status -->
+          <div class="min-w-[180px]">
+            <label for="status" class="label mb-2">Status</label>
+            <select id="status" name="status" class="select w-full">
+              <option value="">Semua Status</option>
+              <option value="pending"   <%= status === 'pending'   ? 'selected' : '' %>>Menunggu</option>
+              <option value="approved"  <%= status === 'approved'  ? 'selected' : '' %>>Disetujui</option>
+              <option value="rejected"  <%= status === 'rejected'  ? 'selected' : '' %>>Ditolak</option>
+              <option value="fulfilled" <%= status === 'fulfilled' ? 'selected' : '' %>>Selesai</option>
+              <option value="cancelled" <%= status === 'cancelled' ? 'selected' : '' %>>Dibatalkan</option>
+            </select>
+          </div>
+
+          <!-- Action buttons -->
+    <div>
+        <label class="label mb-2" style="visibility: hidden" aria-hidden="true">&nbsp;</label>
+        <div class="flex items-center gap-2">
+            <button type="submit" class="btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="mr-2">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            Cari
+            </button>
+            <% if (search || status) { %>
+            <a href="/permintaan" class="btn-outline">Reset</a>
+            <% } %>
+        </div>
+    </div>
+
+        </form>
+      </div>
+
+      <!-- ===== Tombol Buat Baru ===== -->
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-muted-foreground">
+          <% if (totalRecords > 0) { %>
+            Menampilkan <strong><%= ((currentPage - 1) * perPage) + 1 %></strong>–<strong><%= Math.min(currentPage * perPage, totalRecords) %></strong> dari <strong><%= totalRecords %></strong> permintaan
+          <% } else { %>
+            Tidak ada permintaan
+          <% } %>
+        </p>
+        <a href="/permintaan/baru" class="btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+            <path d="M12 5v14" /><path d="M5 12h14" />
+          </svg>
+          Buat Permintaan
+        </a>
+      </div>
+
+      <!-- ===== Tabel Permintaan ===== -->
+      <div class="card overflow-hidden">
+        <% if (requests && requests.length > 0) { %>
+          <table class="table w-full">
+            <thead>
+              <tr>
+                <th>No. Permintaan</th>
+                <th>Tanggal</th>
+                <th>Jumlah Item</th>
+                <th>Total Qty</th>
+                <th>Status</th>
+                <th class="text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% requests.forEach(function(r) { %>
+                <tr>
+                  <td class="font-medium font-mono text-sm"><%= r.request_number %></td>
+                  <td><%= new Date(r.request_date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
+                  <td><%= r.total_items %> item</td>
+                  <td><%= r.total_quantity %></td>
+                  <td>
+                    <%
+                      const statusColors = {
+                        pending:   'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300',
+                        approved:  'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300',
+                        rejected:  'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
+                        fulfilled: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300',
+                        cancelled: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+                      };
+                      const statusLabels = {
+                        pending: 'Menunggu',
+                        approved: 'Disetujui',
+                        rejected: 'Ditolak',
+                        fulfilled: 'Selesai',
+                        cancelled: 'Dibatalkan'
+                      };
+                    %>
+                    <span class="badge <%= statusColors[r.status] || 'bg-gray-100 text-gray-800' %>">
+                      <%= statusLabels[r.status] || r.status %>
+                    </span>
+                  </td>
+                  <td class="text-right">
+                    <a href="/permintaan/<%= r.id %>" class="text-sm text-primary hover:underline">Lihat Detail</a>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <!-- Empty State -->
+          <div class="p-12 text-center text-muted-foreground">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 opacity-50">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            <% if (search || status) { %>
+              <p class="text-sm">Tidak ada permintaan yang cocok dengan filter Anda.</p>
+              <a href="/permintaan" class="text-sm text-primary hover:underline mt-2 inline-block">
+                Reset filter →
+              </a>
+            <% } else { %>
+              <p class="text-sm">Anda belum pernah membuat permintaan barang.</p>
+              <a href="/permintaan/baru" class="text-sm text-primary hover:underline mt-2 inline-block">
+                Buat permintaan pertama Anda →
+              </a>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- ===== Pagination ===== -->
+      <% if (totalPages > 1) { %>
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <p class="text-sm text-muted-foreground">
+            Halaman <strong><%= currentPage %></strong> dari <strong><%= totalPages %></strong>
+          </p>
+
+          <div class="flex items-center gap-1">
+            <%
+              // Helper untuk build URL dengan query params yang dipertahankan
+              function pageUrl(p) {
+                const params = new URLSearchParams();
+                if (p > 1) params.set('page', p);
+                if (search) params.set('search', search);
+                if (status) params.set('status', status);
+                const qs = params.toString();
+                return '/permintaan' + (qs ? '?' + qs : '');
+              }
+            %>
+
+            <!-- Tombol Prev -->
+            <% if (currentPage > 1) { %>
+              <a href="<%= pageUrl(currentPage - 1) %>" class="btn-outline" style="padding: 0.4rem 0.7rem">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </a>
+            <% } else { %>
+              <span class="btn-outline opacity-50 cursor-not-allowed" style="padding: 0.4rem 0.7rem">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </span>
+            <% } %>
+
+            <!-- Nomor halaman: tampilkan max 5 halaman di sekitar current -->
+            <%
+              let startPage = Math.max(1, currentPage - 2);
+              let endPage = Math.min(totalPages, startPage + 4);
+              if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+              }
+            %>
+            <% if (startPage > 1) { %>
+              <a href="<%= pageUrl(1) %>" class="btn-outline" style="padding: 0.4rem 0.7rem">1</a>
+              <% if (startPage > 2) { %>
+                <span class="px-2 text-muted-foreground">…</span>
+              <% } %>
+            <% } %>
+
+            <% for (let p = startPage; p <= endPage; p++) { %>
+              <% if (p === currentPage) { %>
+                <span class="btn" style="padding: 0.4rem 0.7rem"><%= p %></span>
+              <% } else { %>
+                <a href="<%= pageUrl(p) %>" class="btn-outline" style="padding: 0.4rem 0.7rem"><%= p %></a>
+              <% } %>
+            <% } %>
+
+            <% if (endPage < totalPages) { %>
+              <% if (endPage < totalPages - 1) { %>
+                <span class="px-2 text-muted-foreground">…</span>
+              <% } %>
+              <a href="<%= pageUrl(totalPages) %>" class="btn-outline" style="padding: 0.4rem 0.7rem"><%= totalPages %></a>
+            <% } %>
+
+            <!-- Tombol Next -->
+            <% if (currentPage < totalPages) { %>
+              <a href="<%= pageUrl(currentPage + 1) %>" class="btn-outline" style="padding: 0.4rem 0.7rem">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </a>
+            <% } else { %>
+              <span class="btn-outline opacity-50 cursor-not-allowed" style="padding: 0.4rem 0.7rem">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </span>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+
+    </div>
+  </main>
+
+<%- include('../partials/footer') %>

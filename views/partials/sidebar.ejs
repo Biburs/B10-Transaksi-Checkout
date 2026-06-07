@@ -1,0 +1,139 @@
+<!--
+  Partial: sidebar.ejs
+  Lokasi: views/partials/sidebar.ejs
+  Fungsi: Sidebar navigasi yang berubah isi menunya berdasarkan role
+  Variabel yang dibutuhkan:
+    - user      (string) : nama user
+    - userRole  (string) : 'pegawai' | 'admin_logistik' | 'admin'
+    - activeMenu (string): id menu yang sedang aktif (untuk highlight)
+                            contoh: 'dashboard', 'permintaan', 'buat'
+-->
+<aside id="sidebar" class="sidebar" data-side="left" aria-hidden="false">
+  <nav aria-label="Sidebar navigation">
+
+    <!-- ===== BRAND ===== -->
+    <header>
+      <a href="/home" class="btn-ghost p-2 h-12 w-full justify-start">
+        <div class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+            <path d="m3.3 7 8.7 5 8.7-5" />
+            <path d="M12 22V12" />
+          </svg>
+        </div>
+        <div class="grid flex-1 text-left text-sm leading-tight">
+          <span class="truncate font-medium">FTI Logistik</span>
+          <span class="truncate text-xs text-muted-foreground">Sistem Permintaan</span>
+        </div>
+      </a>
+    </header>
+
+    <!-- ===== MENU UTAMA ===== -->
+    <section class="scrollbar">
+
+      <!-- Group: Umum -->
+      <div role="group" aria-labelledby="group-umum">
+        <h3 id="group-umum">Menu Utama</h3>
+        <ul>
+          <li>
+            <a href="/home" <%= activeMenu === 'dashboard' ? 'aria-current="page"' : '' %>>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="7" height="9" x="3" y="3" rx="1" />
+                <rect width="7" height="5" x="14" y="3" rx="1" />
+                <rect width="7" height="9" x="14" y="12" rx="1" />
+                <rect width="7" height="5" x="3" y="16" rx="1" />
+              </svg>
+              <span>Dashboard</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Group: Pegawai (untuk role pegawai) -->
+      <% if (userRole === 'pegawai') { %>
+        <div role="group" aria-labelledby="group-pegawai">
+          <h3 id="group-pegawai">Permintaan Barang</h3>
+          <ul>
+            <li>
+              <a href="/permintaan/baru" <%= activeMenu === 'buat' ? 'aria-current="page"' : '' %>>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 5v14" />
+                  <path d="M5 12h14" />
+                </svg>
+                <span>Buat Permintaan</span>
+              </a>
+            </li>
+            <li>
+              <a href="/permintaan" <%= activeMenu === 'permintaan' ? 'aria-current="page"' : '' %>>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+                <span>Permintaan Saya</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      <% } %>
+
+      <!-- Group: Admin Logistik (untuk role admin_logistik / admin) -->
+      <% if (userRole === 'admin_logistik' || userRole === 'admin') { %>
+        <div role="group" aria-labelledby="group-admin">
+          <h3 id="group-admin">Kelola Permintaan</h3>
+          <ul>
+            <li>
+              <a href="/admin/permintaan" <%= activeMenu === 'admin-permintaan' ? 'aria-current="page"' : '' %>>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18" />
+                  <path d="M3 12h18" />
+                  <path d="M3 18h18" />
+                </svg>
+                <span>Semua Permintaan</span>
+              </a>
+            </li>
+            <li>
+              <a href="/admin/permintaan?status=pending" <%= activeMenu === 'admin-pending' ? 'aria-current="page"' : '' %>>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <span>Menunggu Persetujuan</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      <% } %>
+
+    </section>
+
+    <!-- ===== AKUN (di bawah) ===== -->
+      <footer style="padding: 1rem">
+      <ul>
+        <li>
+          <div class="flex items-center gap-2 px-0 py-2">
+            <div class="bg-muted text-muted-foreground flex aspect-square size-8 items-center justify-center rounded-full text-xs font-semibold">
+              <%= (user || '?').charAt(0).toUpperCase() %>
+            </div>
+            <div class="grid flex-1 text-left leading-tight">
+              <span class="truncate text-sm font-medium"><%= user %></span>
+              <span class="truncate text-xs text-muted-foreground"><%= userRole %></span>
+            </div>
+          </div>
+        </li>
+        <li>
+          <a href="/logout" class="flex items-center gap-2 rounded-md p-1 hover:bg-muted">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span>Logout</span>
+          </a>
+        </li>
+      </ul>
+    </footer>
+
+  </nav>
+</aside>
