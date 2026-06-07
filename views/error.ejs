@@ -1,3 +1,42 @@
-<h1><%= message %></h1>
-<h2><%= error.status %></h2>
-<pre><%= error.stack %></pre>
+<!--
+  View: error.ejs
+  Lokasi: views/error.ejs
+  Fungsi: Halaman error (404, 403, 500, dll)
+  Variabel yang dibutuhkan:
+    - message (string) : pesan error
+    - error   (object) : { status, stack } - dari errorHandler middleware
+-->
+
+<%- include('partials/head', { title: 'Error' }) %>
+
+<body class="bg-background">
+  <div class="min-h-screen flex items-center justify-center p-6">
+    <div class="max-w-md w-full text-center">
+
+      <div class="size-20 mx-auto mb-6 rounded-full bg-destructive/10 text-destructive flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      </div>
+
+      <h1 class="text-6xl font-bold mb-2"><%= error.status || 500 %></h1>
+      <p class="text-lg text-muted-foreground mb-6"><%= message || 'Terjadi kesalahan pada server' %></p>
+
+      <div class="flex gap-3 justify-center">
+        <a href="/home" class="btn">Kembali ke Dashboard</a>
+        <a href="/logout" class="btn-outline">Logout</a>
+      </div>
+
+      <% if (error.stack) { %>
+        <details class="mt-8 text-left">
+          <summary class="text-xs text-muted-foreground cursor-pointer">Detail teknis (development only)</summary>
+          <pre class="text-xs mt-2 p-3 bg-muted rounded overflow-auto"><%= error.stack %></pre>
+        </details>
+      <% } %>
+
+    </div>
+  </div>
+
+<%- include('partials/footer') %>

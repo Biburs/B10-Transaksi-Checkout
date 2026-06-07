@@ -8,6 +8,8 @@ var MySQLStore = require('express-mysql-session')(session);
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var permintaanRouter = require('./routes/permintaan');
+var apiRouter = require('./routes/api');
 const { notFoundHandler, errorHandler } = require('./middlewares/error');
 
 var app = express();
@@ -28,6 +30,17 @@ const sessionStore = new MySQLStore({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+
+ // Tabel sudah dibuat manual di phpMyAdmin, jadi tidak perlu auto-create
+  createDatabaseTable: false,
+  schema: {
+    tableName: "node_sessions",
+    columnNames: {
+      session_id: "session_id",
+      expires: "expires",
+      data: "data",
+    },
+  },
 });
 
 app.use(session({
@@ -43,6 +56,8 @@ app.use(session({
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/permintaan', permintaanRouter);
+app.use('/api', apiRouter);
 
 // catch 404 and forward to error handler
 app.use(notFoundHandler);

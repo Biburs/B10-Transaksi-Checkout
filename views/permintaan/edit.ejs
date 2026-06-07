@@ -1,0 +1,239 @@
+<!--
+  View: permintaan/edit.ejs
+  Lokasi: views/permintaan/edit.ejs
+  Fungsi: Form edit permintaan barang (mirip baru.ejs tapi pre-filled)
+  Variabel dari controller:
+    - title           (string)  : "Edit REQ-XXXX"
+    - user            (string)  : nama user
+    - userRole        (string)  : 'pegawai'
+    - request         (object)  : { id, request_number, request_date, status }
+    - existingItems   (array)   : detail item existing (atau hasil submit jika error)
+    - items           (array)   : master items untuk dropdown
+    - error           (string?) : pesan error validasi
+    - formDataDate    (string?) : tanggal yang user input saat error
+-->
+
+<%- include('../partials/head', { title: title }) %>
+
+<body class="bg-background">
+  <%- include('../partials/sidebar', { user: user, userRole: userRole, activeMenu: 'permintaan' }) %>
+
+  <main id="content">
+    <%- include('../partials/topbar', {
+      pageTitle: 'Edit Permintaan',
+      pageSubtitle: 'Ubah detail permintaan ' + request.request_number
+    }) %>
+
+    <div class="p-6 space-y-6 max-w-5xl">
+
+      <!-- Breadcrumb -->
+      <a href="/permintaan/<%= request.id %>" class="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Kembali ke detail permintaan
+      </a>
+
+      <!-- Banner Error -->
+      <% if (error) { %>
+        <div class="card p-4 border-l-4 border-red-500 bg-red-50 dark:bg-red-950">
+          <div class="flex items-start gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600 dark:text-red-400 mt-0.5 shrink-0">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <div>
+              <p class="font-semibold text-red-900 dark:text-red-100">Periksa kembali isian form Anda</p>
+              <p class="text-sm text-red-700 dark:text-red-300 mt-1"><%= error %></p>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Info Banner: status pending -->
+      <div class="card p-4 border-l-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-950">
+        <div class="flex items-start gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-600 dark:text-yellow-400 mt-0.5 shrink-0">
+            <path d="M12 9v4" /><path d="M12 17h.01" /><path d="M3.34 17a10 10 0 1 1 17.32 0H3.34Z" />
+          </svg>
+          <div>
+            <p class="font-semibold text-yellow-900 dark:text-yellow-100">Mengedit permintaan: <span class="font-mono"><%= request.request_number %></span></p>
+            <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+              Setelah disimpan, status akan tetap <strong>Menunggu</strong> dan harus ditinjau ulang oleh admin logistik.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form action="/permintaan/<%= request.id %>/edit" method="POST" id="formEdit">
+
+        <!-- Card 1: Informasi -->
+        <div class="card p-6 mb-6">
+          <h2 class="text-base font-semibold mb-4">Informasi Permintaan</h2>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="request_date" class="label">Tanggal Permintaan <span class="text-red-500">*</span></label>
+              <input
+                type="date"
+                id="request_date"
+                name="request_date"
+                class="input w-full"
+                value="<%= (typeof formDataDate !== 'undefined' && formDataDate) ? formDataDate : new Date(request.request_date).toISOString().split('T')[0] %>"
+                required
+              />
+            </div>
+            <div>
+              <label class="label">Nomor Permintaan</label>
+              <input
+                type="text"
+                class="input w-full font-mono"
+                value="<%= request.request_number %>"
+                readonly
+                style="background-color: var(--color-muted); cursor: not-allowed"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Daftar Item -->
+        <div class="card p-6 mb-6">
+          <div class="mb-4">
+            <h2 class="text-base font-semibold">Daftar Barang</h2>
+            <p class="text-sm text-muted-foreground mt-1">Tambah, ubah, atau hapus barang sesuai kebutuhan.</p>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="table w-full" id="tableItems">
+              <thead>
+                <tr>
+                  <th style="width: 50px">#</th>
+                  <th style="min-width: 280px">Barang <span class="text-red-500">*</span></th>
+                  <th style="width: 130px">Jumlah <span class="text-red-500">*</span></th>
+                  <th style="min-width: 200px">Spesifikasi</th>
+                  <th style="width: 80px" class="text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="item-rows">
+                <% 
+                  const rowsToRender = (existingItems && existingItems.length > 0) 
+                    ? existingItems 
+                    : [{ item_id: '', quantity: '', specification: '' }];
+                  rowsToRender.forEach(function(row, idx) { 
+                %>
+                  <tr class="item-row">
+                    <td class="row-number"><%= idx + 1 %></td>
+                    <td>
+                      <select name="item_id" class="select w-full" required>
+                        <option value="">-- Pilih barang --</option>
+                        <% items.forEach(function(opt) { %>
+                          <option 
+                            value="<%= opt.id %>" 
+                            <%= (row && row.item_id == opt.id) ? 'selected' : '' %>
+                          >
+                            <%= opt.code %> &middot; <%= opt.name %> (<%= opt.unit %>)
+                          </option>
+                        <% }); %>
+                      </select>
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        name="quantity"
+                        class="input w-full"
+                        min="1"
+                        value="<%= row ? row.quantity : '' %>"
+                        required
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        name="specification"
+                        class="input w-full"
+                        placeholder="Opsional"
+                        value="<%= row && row.specification ? row.specification : '' %>"
+                      />
+                    </td>
+                    <td class="text-right">
+                      <button
+                        type="button"
+                        class="btn-outline btn-remove"
+                        onclick="removeRow(this)"
+                        title="Hapus baris"
+                        style="padding: 0.4rem 0.6rem"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="18" y1="6" x2="6" y2="18" />
+                          <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mt-4">
+            <button type="button" class="btn-outline" onclick="addRow()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                <path d="M12 5v14" /><path d="M5 12h14" />
+              </svg>
+              Tambah Barang
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="flex items-center justify-end gap-3">
+          <a href="/permintaan/<%= request.id %>" class="btn-outline">Batal</a>
+          <button type="submit" class="btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            Simpan Perubahan
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </main>
+
+  <script>
+    function addRow() {
+      const tbody = document.getElementById("item-rows");
+      const firstRow = tbody.querySelector(".item-row");
+      const clone = firstRow.cloneNode(true);
+
+      clone.querySelector('select[name="item_id"]').value = "";
+      clone.querySelector('input[name="quantity"]').value = "";
+      clone.querySelector('input[name="specification"]').value = "";
+
+      tbody.appendChild(clone);
+      renumberRows();
+    }
+
+    function removeRow(btn) {
+      const rows = document.querySelectorAll(".item-row");
+      if (rows.length <= 1) {
+        alert("Minimal 1 baris barang harus ada");
+        return;
+      }
+      btn.closest(".item-row").remove();
+      renumberRows();
+    }
+
+    function renumberRows() {
+      document.querySelectorAll(".item-row").forEach(function (row, idx) {
+        row.querySelector(".row-number").textContent = idx + 1;
+      });
+    }
+  </script>
+
+<%- include('../partials/footer') %>

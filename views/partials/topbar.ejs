@@ -1,0 +1,38 @@
+<!--
+  Partial: topbar.ejs
+  Lokasi: views/partials/topbar.ejs
+  Fungsi: Header di dalam main content (judul halaman + theme toggle)
+  Variabel yang dibutuhkan:
+    - pageTitle (string)    : judul halaman, tampil di topbar (h1)
+    - pageSubtitle (string) : (opsional) deskripsi pendek di bawah judul
+-->
+<header class="flex items-center justify-between p-6 border-b">
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight"><%= pageTitle %></h1>
+    <% if (typeof pageSubtitle !== 'undefined' && pageSubtitle) { %>
+      <p class="text-sm text-muted-foreground mt-1"><%= pageSubtitle %></p>
+    <% } %>
+  </div>
+
+  <!-- Theme toggle button -->
+  <button
+    type="button"
+    onclick="document.dispatchEvent(new CustomEvent('basecoat:theme'))"
+    class="inline-flex items-center justify-center rounded-md h-9 w-9 hover:bg-muted transition"
+    title="Ubah tema (terang / gelap)"
+    aria-label="Toggle theme"
+  >
+    <!-- Icon matahari (tampil di mode terang) -->
+    <svg class="dark:hidden" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2" /><path d="M12 20v2" />
+      <path d="m4.93 4.93 1.41 1.41" /><path d="m17.66 17.66 1.41 1.41" />
+      <path d="M2 12h2" /><path d="M20 12h2" />
+      <path d="m6.34 17.66-1.41 1.41" /><path d="m19.07 4.93-1.41 1.41" />
+    </svg>
+    <!-- Icon bulan (tampil di mode gelap) -->
+    <svg class="hidden dark:block" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+    </svg>
+  </button>
+</header>

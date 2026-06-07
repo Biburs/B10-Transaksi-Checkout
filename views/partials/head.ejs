@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <!-- Theme mode (light/dark) initializer -->
+    <script>
+      (() => {
+        try {
+          const stored = localStorage.getItem("themeMode");
+          if (
+            stored
+              ? stored === "dark"
+              : matchMedia("(prefers-color-scheme: dark)").matches
+          ) {
+            document.documentElement.classList.add("dark");
+          }
+        } catch (_) {}
+
+        const apply = (dark) => {
+          document.documentElement.classList.toggle("dark", dark);
+          try {
+            localStorage.setItem("themeMode", dark ? "dark" : "light");
+          } catch (_) {}
+        };
+
+        document.addEventListener("basecoat:theme", (event) => {
+          const mode = event.detail?.mode;
+          apply(
+            mode === "dark"
+              ? true
+              : mode === "light"
+                ? false
+                : !document.documentElement.classList.contains("dark"),
+          );
+        });
+      })();
+    </script>
+
+    <!-- Theme variant (warna primer) initializer -->
+    <script>
+      (function () {
+        try {
+          const storedTheme = localStorage.getItem("themeVariant");
+          if (storedTheme)
+            document.documentElement.classList.add(`theme-${storedTheme}`);
+        } catch (event) {
+          console.error("Could not apply theme variant from localStorage", event);
+        }
+      })();
+    </script>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Language" content="id" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title><%= title %> - FTI Sistem Logistik</title>
+
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <link rel="stylesheet" href="/assets/styles.css" />
+
+    <!-- Basecoat UI components -->
+    <script src="/assets/js/basecoat.js?v=0.3.11" defer></script>
+    <script src="/assets/js/sidebar.js?v=0.3.11" defer></script>
+    <script src="/assets/js/dropdown-menu.js?v=0.3.11" defer></script>
+    <script src="/assets/js/popover.js?v=0.3.11" defer></script>
+    <script src="/assets/js/toast.js?v=0.3.11" defer></script>
+
+    <!-- HTMX untuk partial update tanpa SPA -->
+    <script src="/assets/htmx.org@2.0.4" defer></script>
+  </head>
