@@ -1,0 +1,225 @@
+<!-- Fungsi: Detail permintaan untuk admin dengan approval actions -->
+
+<%- include('../../partials/head', { title: title }) %>
+
+<body class="bg-background">
+  <%- include('../../partials/sidebar', { user: user, userRole: userRole, activeMenu: header.status === 'pending' ? 'admin-pending' : 'admin-permintaan' }) %>
+
+  <main id="content">
+    <%- include('../../partials/topbar', {
+      pageTitle: `Detail Permintaan`,
+      pageSubtitle: header.request_number
+    }) %>
+
+    <div class="p-6 space-y-6 max-w-5xl mx-auto">
+
+      <!-- ===== Breadcrumb & Back Button ===== -->
+      <nav class="flex text-sm text-muted-foreground" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-2">
+          <li class="inline-flex items-center">
+            <a href="/admin/permintaan" class="hover:text-foreground hover:underline transition-colors">Semua Permintaan</a>
+          </li>
+          <li>
+            <div class="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-1 opacity-50"><polyline points="9 18 15 12 9 6"/></svg>
+              <span class="text-foreground"><%= header.request_number %></span>
+            </div>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- ===== Flash Messages ===== -->
+      <% if (approved) { %>
+        <div class="alert bg-green-50 text-green-900 border-green-200 dark:bg-green-950/50 dark:text-green-300 dark:border-green-900" role="alert">
+          <div class="flex gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div>
+              <p class="font-medium text-sm">Permintaan disetujui!</p>
+              <p class="text-sm opacity-90 mt-1">Surat Keputusan Persetujuan sudah bisa dicetak.</p>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <% if (rejected) { %>
+        <div class="alert bg-red-50 text-red-900 border-red-200 dark:bg-red-950/50 dark:text-red-300 dark:border-red-900" role="alert">
+          <div class="flex gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <div>
+              <p class="font-medium text-sm">Permintaan ditolak.</p>
+              <p class="text-sm opacity-90 mt-1">Surat Keputusan Penolakan sudah bisa dicetak.</p>
+            </div>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- ===== Info Card ===== -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Pemohon -->
+        <div class="card p-5">
+          <div class="flex items-center gap-2 mb-4 text-muted-foreground border-b pb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <h2 class="font-semibold text-foreground">Informasi Pemohon</h2>
+          </div>
+          <div class="space-y-3 text-sm">
+            <div class="grid grid-cols-3 gap-2">
+              <span class="text-muted-foreground">Nama</span>
+              <span class="col-span-2 font-medium"><%= header.pemohon_name %></span>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <span class="text-muted-foreground">NIP</span>
+              <span class="col-span-2"><%= header.pemohon_nip || '-' %></span>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <span class="text-muted-foreground">Unit Kerja</span>
+              <span class="col-span-2"><%= header.pemohon_unit || '-' %></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detail Permintaan -->
+        <div class="card p-5">
+          <div class="flex items-center justify-between border-b pb-3 mb-4">
+            <div class="flex items-center gap-2 text-muted-foreground">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              <h2 class="font-semibold text-foreground">Detail Permintaan</h2>
+            </div>
+            <%
+              const statusColors = {
+                pending:   'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300',
+                approved:  'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300',
+                rejected:  'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
+                fulfilled: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300',
+                cancelled: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+              };
+              const statusLabels = {
+                pending: 'Menunggu',
+                approved: 'Disetujui',
+                rejected: 'Ditolak',
+                fulfilled: 'Selesai',
+                cancelled: 'Dibatalkan'
+              };
+            %>
+            <span class="badge <%= statusColors[header.status] || 'bg-gray-100 text-gray-800' %>">
+              <%= statusLabels[header.status] || header.status %>
+            </span>
+          </div>
+          <div class="space-y-3 text-sm">
+            <div class="grid grid-cols-3 gap-2">
+              <span class="text-muted-foreground">Tanggal</span>
+              <span class="col-span-2 font-medium">
+                <%= new Date(header.request_date).toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) %>
+              </span>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <span class="text-muted-foreground">Total Item</span>
+              <span class="col-span-2"><%= totalItems %> jenis barang</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <span class="text-muted-foreground">Total Qty</span>
+              <span class="col-span-2"><%= totalQuantity %></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ===== Actions ===== -->
+      <div class="flex items-center gap-3 py-2 border-y">
+        <% if (['approved', 'rejected', 'fulfilled'].includes(header.status)) { %>
+          <a href="/admin/permintaan/<%= header.id %>/cetak" target="_blank" class="btn-outline">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+            Cetak Surat Keputusan
+          </a>
+        <% } else { %>
+          <button disabled class="btn opacity-50 cursor-not-allowed bg-blue-600 hover:bg-blue-600 text-white border-transparent">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Setujui Permintaan
+          </button>
+          <button disabled class="btn opacity-50 cursor-not-allowed bg-red-600 hover:bg-red-600 text-white border-transparent">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            Tolak Permintaan
+          </button>
+        <% } %>
+      </div>
+
+      <!-- ===== Daftar Barang ===== -->
+      <div class="card overflow-hidden">
+        <div class="p-4 bg-muted/30 border-b">
+          <h3 class="font-semibold text-sm">Daftar Barang yang Diminta</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="table w-full">
+            <thead>
+              <tr class="bg-muted/10">
+                <th class="w-12 text-center">No</th>
+                <th class="w-32">Kode Barang</th>
+                <th>Nama Barang</th>
+                <th>Spesifikasi</th>
+                <th class="w-24 text-center">Jumlah</th>
+                <th class="w-24">Satuan</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% details.forEach((item, idx) => { %>
+                <tr class="hover:bg-muted/20 transition-colors">
+                  <td class="text-center text-muted-foreground"><%= idx + 1 %></td>
+                  <td class="font-mono text-xs"><%= item.item_code || '-' %></td>
+                  <td class="font-medium"><%= item.item_name %></td>
+                  <td class="text-muted-foreground text-sm"><%= item.specification || '-' %></td>
+                  <td class="text-center font-semibold"><%= item.quantity %></td>
+                  <td class="text-sm"><%= item.item_unit || '-' %></td>
+                </tr>
+              <% }) %>
+              <tr class="bg-muted/30 font-semibold border-t-2">
+                <td colspan="4" class="text-right py-3">Total Item</td>
+                <td class="text-center py-3"><%= totalQuantity %></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== Approval Timeline ===== -->
+      <% if (approvals && approvals.length > 0) { %>
+        <div class="card p-5">
+          <h3 class="font-semibold text-sm mb-4 border-b pb-3">Riwayat Persetujuan</h3>
+          <div class="space-y-6">
+            <% approvals.forEach((appr, idx) => { %>
+              <div class="relative pl-6">
+                <!-- Garis vertical (kecuali item terakhir) -->
+                <% if (idx < approvals.length - 1) { %>
+                  <div class="absolute left-2.5 top-5 bottom-[-1.5rem] w-px bg-border"></div>
+                <% } %>
+                
+                <!-- Dot icon -->
+                <div class="absolute left-1 top-1 w-3 h-3 rounded-full border-2 border-background <%= appr.status === 'approved' ? 'bg-blue-500' : (appr.status === 'rejected' ? 'bg-red-500' : 'bg-green-500') %>"></div>
+                
+                <div class="text-sm">
+                  <p class="font-medium">
+                    <%= appr.status === 'approved' ? 'Disetujui' : (appr.status === 'rejected' ? 'Ditolak' : appr.status) %>
+                    <span class="text-muted-foreground font-normal ml-1">oleh <%= appr.approver_name %></span>
+                  </p>
+                  <p class="text-xs text-muted-foreground mt-0.5">
+                    <%= new Date(appr.action_date).toLocaleString('id-ID', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' }) %>
+                  </p>
+                  <% if (appr.notes) { %>
+                    <div class="mt-2 p-3 bg-muted rounded-md text-muted-foreground italic border-l-2 <%= appr.status === 'approved' ? 'border-l-blue-500' : 'border-l-red-500' %>">
+                      "<%= appr.notes %>"
+                    </div>
+                  <% } %>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+
+    </div>
+  </main>
+
+
+
+<%- include('../../partials/footer') %>

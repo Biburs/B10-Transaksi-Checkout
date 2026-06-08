@@ -71,20 +71,26 @@ async function givePermissionToRole(roleId, permissionId) {
 
 async function seed() {
   try {
-    // 1. Buat 2 role
+    // 1. Buat 3 role
     const adminRoleId = await ensureRole("admin");
+    const adminLogistikRoleId = await ensureRole("admin_logistik");
     const pegawaiRoleId = await ensureRole("pegawai");
-    console.log("✓ Role: admin =", adminRoleId, ", pegawai =", pegawaiRoleId);
+    console.log("✓ Role: admin =", adminRoleId, ", admin_logistik =", adminLogistikRoleId, ", pegawai =", pegawaiRoleId);
 
     // 2. Buat permission contoh
     const manageUsersId = await ensurePermission("manage_users");
     const viewDashboardId = await ensurePermission("view_dashboard");
     console.log("✓ Permission disiapkan");
 
-    // 3. Buat 2 user (email & password sesuai kebutuhan project)
+    // 3. Buat 3 user (email & password sesuai kebutuhan project)
     const adminUserId = await ensureUser(
       "Administrator",
       "admin@gmail.com",
+      "admin123"
+    );
+    const adminLogistikUserId = await ensureUser(
+      "Admin Logistik",
+      "admin.logistik@gmail.com",
       "admin123"
     );
     const pegawaiUserId = await ensureUser(
@@ -92,10 +98,11 @@ async function seed() {
       "pegawai@gmail.com",
       "pegawai123"
     );
-    console.log("✓ User: admin =", adminUserId, ", pegawai =", pegawaiUserId);
+    console.log("✓ User: admin =", adminUserId, ", admin_logistik =", adminLogistikUserId, ", pegawai =", pegawaiUserId);
 
     // 4. Hubungkan user -> role
     await assignRole(adminUserId, adminRoleId);
+    await assignRole(adminLogistikUserId, adminLogistikRoleId);
     await assignRole(pegawaiUserId, pegawaiRoleId);
     console.log("✓ User dihubungkan ke role masing-masing");
 
@@ -108,8 +115,9 @@ async function seed() {
     console.log("✓ Permission tiap role diatur");
 
     console.log("\n=== SELESAI ===");
-    console.log("Akun admin   -> admin@gmail.com   / admin123");
-    console.log("Akun pegawai -> pegawai@gmail.com / pegawai123");
+    console.log("Akun admin          -> admin@gmail.com          / admin123");
+    console.log("Akun admin logistik -> admin.logistik@gmail.com / admin123");
+    console.log("Akun pegawai        -> pegawai@gmail.com        / pegawai123");
     process.exit(0);
   } catch (err) {
     console.error("Error saat seeding:", err.message);
