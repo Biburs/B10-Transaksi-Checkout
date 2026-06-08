@@ -7,12 +7,7 @@ const db = require("../lib/db");
 
 const PDFDocument = require("pdfkit");
 
-// ---------------------------------------------------------------------
-// HELPER: Generate request number dengan format REQ-YYYYMMDD-NNN
-// Counter NNN di-reset setiap hari, di-pad jadi 3 digit (001, 002, ...).
-// CATATAN: ada potensi race condition kalau 2 user submit bersamaan.
-//          Untuk skala project ini bisa diabaikan.
-// ---------------------------------------------------------------------
+
 async function generateRequestNumber(connection) {
   const today = new Date();
   const yyyy = today.getFullYear();
@@ -46,7 +41,6 @@ async function getItemsForDropdown() {
 // ---------------------------------------------------------------------
 // GET /permintaan/baru
 // Tampilkan form buat permintaan baru.
-// Query param ?success=REQ-XXX akan tampilkan banner sukses.
 // ---------------------------------------------------------------------
 exports.formBaru = async (req, res, next) => {
   try {
@@ -68,6 +62,7 @@ exports.formBaru = async (req, res, next) => {
   }
 };
 
+
 // ---------------------------------------------------------------------
 // POST /permintaan/baru
 // Proses simpan permintaan baru (header + N detail item).
@@ -77,8 +72,6 @@ exports.createPermintaan = async (req, res, next) => {
   const { request_date } = req.body;
 
   // ----- Normalisasi input array -----
-  // HTML form mengirim multiple field dengan nama sama sebagai array,
-  // kecuali kalau cuma 1 baris -> kirim sebagai string. Kita normalisasi.
   let item_id = req.body.item_id;
   let quantity = req.body.quantity;
   let specification = req.body.specification;
@@ -97,12 +90,11 @@ exports.createPermintaan = async (req, res, next) => {
     errors.push("Format tanggal tidak valid");
   }
 
-  // Validasi & filter items: ambil hanya baris yang terisi
   const validItems = [];
   const seenItems = new Set();
 
   for (let i = 0; i < item_id.length; i++) {
-    if (!item_id[i]) continue; // skip baris kosong
+    if (!item_id[i]) continue;
 
     const itemIdInt = parseInt(item_id[i], 10);
     const qty = parseInt(quantity[i], 10);
@@ -122,12 +114,9 @@ exports.createPermintaan = async (req, res, next) => {
       continue;
     }
 
-    // Deteksi item duplikat (boleh, tapi beri warning)
     const key = `${itemIdInt}-${spec}`;
     if (seenItems.has(key)) {
-      errors.push(
-        `Baris ${i + 1}: item dengan spesifikasi yang sama sudah ada`
-      );
+      errors.push(`Baris ${i + 1}: item dengan spesifikasi yang sama sudah ada`);
       continue;
     }
     seenItems.add(key);
@@ -137,6 +126,25 @@ exports.createPermintaan = async (req, res, next) => {
 
   if (validItems.length === 0 && errors.length === 0) {
     errors.push("Minimal 1 item harus dipilih dengan jumlah valid");
+  }
+
+  // ----- [BARU] Validasi item_id existence dalam SATU query (anti N+1) -----
+  // Jalankan hanya kalau belum ada error lain (hemat query)
+  let itemNameMap = new Map();
+  if (errors.length === 0) {
+    const uniqueIds = [...new Set(validItems.map((it) => it.item_id))];
+    const [itemRows] = await db.query(
+      "SELECT id, name FROM items WHERE id IN (?)",
+      [uniqueIds]
+    );
+    itemNameMap = new Map(itemRows.map((r) => [r.id, r.name]));
+
+    const invalidIds = uniqueIds.filter((id) => !itemNameMap.has(id));
+    if (invalidIds.length > 0) {
+      errors.push(
+        `Item dengan ID ${invalidIds.join(", ")} tidak ditemukan di master barang`
+      );
+    }
   }
 
   // Kalau ada error, render kembali form
@@ -163,12 +171,8 @@ exports.createPermintaan = async (req, res, next) => {
   try {
     await connection.beginTransaction();
 
-    // Generate request_number
     const requestNumber = await generateRequestNumber(connection);
 
-    // Insert header permintaan
-    // CATATAN: approved_by_id NOT NULL (bug bawaan SQL dosen, kolom redundant
-    //          tanpa FK), kita isi dengan 0 karena belum ada approver.
     const [resHeader] = await connection.query(
       `INSERT INTO inventory_requests
        (request_number, employee_id, request_date, status, created_at, updated_at)
@@ -178,18 +182,9 @@ exports.createPermintaan = async (req, res, next) => {
 
     const requestId = resHeader.insertId;
 
-    // Insert tiap detail item
+    // [BARU] Pakai itemNameMap (sudah di-fetch di awal), tidak query lagi per item
     for (const item of validItems) {
-      // Ambil nama item untuk denormalization (snapshot saat permintaan dibuat)
-      const [nameRows] = await connection.query(
-        "SELECT name FROM items WHERE id = ? LIMIT 1",
-        [item.item_id]
-      );
-      if (nameRows.length === 0) {
-        throw new Error(`Item dengan id ${item.item_id} tidak ditemukan`);
-      }
-      const itemName = nameRows[0].name;
-
+      const itemName = itemNameMap.get(item.item_id);
       await connection.query(
         `INSERT INTO inventory_request_details
          (inventory_request_id, item_id, item_name, specification, quantity, created_at, updated_at)
@@ -199,8 +194,6 @@ exports.createPermintaan = async (req, res, next) => {
     }
 
     await connection.commit();
-
-    // Redirect ke form lagi dengan banner sukses (pattern Post/Redirect/Get)
     return res.redirect(
       "/permintaan/baru?success=" + encodeURIComponent(requestNumber)
     );
@@ -219,11 +212,6 @@ exports.createPermintaan = async (req, res, next) => {
 // GET /permintaan
 // Daftar permintaan milik pegawai yang login.
 // Mendukung: search, filter by status, pagination.
-//
-// Query params:
-//   ?page=1          (default 1)
-//   ?search=         (cari di request_number atau nama item)
-//   ?status=         (pending|approved|rejected|fulfilled|cancelled|"")
 // ---------------------------------------------------------------------
 exports.listPermintaan = async (req, res, next) => {
   const employeeId = req.session.employeeId;

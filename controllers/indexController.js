@@ -4,9 +4,9 @@ const db = require("../lib/db");
 // Harus konsisten dengan middlewares/acl.js dan scripts/seed_login.js
 const MODEL_TYPE = "App\\Models\\User";
 
-/**
- * GET /
- * Root: arahkan ke /home jika sudah login, ke /login jika belum.
+/*
+ GET /
+ Root: arahkan ke /home jika sudah login, ke /login jika belum.
  */
 const index = (req, res) => {
   if (req.session.userId) return res.redirect("/home");
@@ -14,8 +14,8 @@ const index = (req, res) => {
 };
 
 /**
- * GET /login
- * Tampilkan form login (kalau sudah login, redirect ke /home).
+ GET /login
+ Tampilkan form login (kalau sudah login, redirect ke /home).
  */
 const loginPage = (req, res) => {
   if (req.session.userId) {
@@ -24,12 +24,12 @@ const loginPage = (req, res) => {
   res.render("login", { title: "Login", error: null });
 };
 
-/**
- * POST /login
- * Proses login + simpan userId, userName, userEmail, userRole, employeeId ke session.
- *
- * Catatan: kita ambil role saat login (sekali) lalu simpan ke session,
- *          supaya tidak query roles di setiap request.
+/*
+ POST /login
+ Proses login + simpan userId, userName, userEmail, userRole, employeeId ke session.
+ 
+ Catatan: kami ambil role saat login (sekali) lalu simpan ke session,
+         supaya tidak query roles di setiap request.
  */
 const login = async (req, res, next) => {
   const { email, password } = req.body;
@@ -104,11 +104,11 @@ const login = async (req, res, next) => {
   }
 };
 
-/**
- * GET /home
- * Dashboard utama:
- *   - Untuk pegawai: statistik & permintaan terakhir milik dirinya sendiri
- *   - Untuk admin/admin_logistik: statistik & permintaan terakhir SEMUA pegawai
+/*
+ GET /home
+ Dashboard utama:
+ - Untuk pegawai: statistik & permintaan terakhir milik dirinya sendiri
+ - Untuk admin/admin_logistik: statistik & permintaan terakhir SEMUA pegawai
  */
 const home = async (req, res, next) => {
   const userRole = req.session.userRole || "pegawai";
@@ -219,9 +219,9 @@ const home = async (req, res, next) => {
   }
 };
 
-/**
- * GET /logout
- * Hapus session + redirect ke /login.
+/*
+ GET /logout
+ Hapus session + redirect ke /login.
  */
 const logout = (req, res, next) => {
   req.session.destroy((err) => {

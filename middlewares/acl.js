@@ -3,12 +3,12 @@ const db = require("../lib/db");
 // Harus sama dengan model_type yang dipakai saat seeding
 const MODEL_TYPE = "App\\Models\\User";
 
-/**
- * Middleware ACL: cek apakah user punya salah satu permission yang dibutuhkan.
- * Skema (pola Spatie):
- *   users.id = model_has_roles.model_id (model_type = 'App\Models\User')
- *   model_has_roles.role_id -> role_has_permissions.role_id
- *   role_has_permissions.permission_id -> permissions.id
+/*
+ Middleware ACL: cek apakah user punya salah satu permission yang dibutuhkan.
+ Skema (pola Spatie):
+ users.id = model_has_roles.model_id (model_type = 'App\Models\User')
+ model_has_roles.role_id -> role_has_permissions.role_id
+ role_has_permissions.permission_id -> permissions.id
  */
 const checkPermission = (requiredPermissions) => {
   return async (req, res, next) => {
