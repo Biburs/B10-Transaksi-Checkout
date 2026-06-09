@@ -57,7 +57,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         <!-- Pemohon -->
-        <div class="card p-5">
+        <div class="card" style="padding: 1.5rem;">
           <div class="flex items-center gap-2 mb-4 text-muted-foreground border-b pb-3">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <h2 class="font-semibold text-foreground">Informasi Pemohon</h2>
@@ -79,20 +79,13 @@
         </div>
 
         <!-- Detail Permintaan -->
-        <div class="card p-5">
+        <div class="card" style="padding: 1.5rem;">
           <div class="flex items-center justify-between border-b pb-3 mb-4">
             <div class="flex items-center gap-2 text-muted-foreground">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
               <h2 class="font-semibold text-foreground">Detail Permintaan</h2>
             </div>
             <%
-              const statusColors = {
-                pending:   'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300',
-                approved:  'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300',
-                rejected:  'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
-                fulfilled: 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300',
-                cancelled: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
-              };
               const statusLabels = {
                 pending: 'Menunggu',
                 approved: 'Disetujui',
@@ -101,7 +94,7 @@
                 cancelled: 'Dibatalkan'
               };
             %>
-            <span class="badge <%= statusColors[header.status] || 'bg-gray-100 text-gray-800' %>">
+            <span class="badge" style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; background-color: var(--color-primary); color: var(--color-primary-foreground);">
               <%= statusLabels[header.status] || header.status %>
             </span>
           </div>
@@ -132,23 +125,111 @@
       </div>
 
       <!-- ===== Actions ===== -->
-      <div class="flex items-center gap-3 py-2 border-y">
-        <% if (['approved', 'rejected', 'fulfilled'].includes(header.status)) { %>
-          <a href="/admin/permintaan/<%= header.id %>/cetak" target="_blank" class="btn-outline">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
-            Cetak Surat Keputusan
-          </a>
-        <% } else { %>
-          <button disabled class="btn opacity-50 cursor-not-allowed bg-blue-600 hover:bg-blue-600 text-white border-transparent">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            Setujui Permintaan
-          </button>
-          <button disabled class="btn opacity-50 cursor-not-allowed bg-red-600 hover:bg-red-600 text-white border-transparent">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-            Tolak Permintaan
-          </button>
-        <% } %>
+      <div class="card border-y mb-6" style="padding: 1.5rem;">
+        <h3 class="font-semibold text-sm mb-4 border-b pb-3">Aksi Admin Logistik</h3>
+        <div class="flex flex-wrap items-center gap-3">
+          
+          <% if (header.status === 'pending') { %>
+            <div class="w-full flex flex-col gap-4">
+              <!-- Setujui -->
+              <form action="/admin/permintaan/<%= header.id %>/approve" method="POST" class="flex items-center gap-2">
+                <input type="text" name="notes" placeholder="Catatan persetujuan (opsional)..." class="border border-gray-300 px-4 py-2 rounded-md text-sm w-72 bg-background text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <button type="submit" class="btn btn-primary">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  Setujui
+                </button>
+              </form>
+              
+              <!-- Tolak -->
+              <form action="/admin/permintaan/<%= header.id %>/reject" method="POST" class="flex items-center gap-2">
+                <input type="text" name="notes" placeholder="Alasan penolakan (wajib)..." required class="border border-red-300 px-4 py-2 rounded-md text-sm w-72 bg-background text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                <button type="submit" class="btn btn-primary">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                  Tolak
+                </button>
+              </form>
+            </div>
+          <% } %>
+
+          <% if (header.status === 'approved' || header.status === 'rejected') { %>
+            <!-- Batalkan Keputusan -->
+            <form action="/admin/permintaan/<%= header.id %>/cancel-decision" method="POST" class="inline-flex" onsubmit="return confirm('Yakin ingin membatalkan keputusan ini? Status akan kembali menjadi pending.');">
+              <button type="submit" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                Batalkan Keputusan
+              </button>
+            </form>
+
+            <a href="/admin/permintaan/<%= header.id %>/cetak" target="_blank" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+              Cetak SK
+            </a>
+          <% } %>
+
+          <% if (header.status === 'approved') { %>
+            <!-- Selesaikan (Complete) -->
+            <form action="/admin/permintaan/<%= header.id %>/complete" method="POST" class="inline-flex" onsubmit="return confirm('Selesaikan permintaan ini?');">
+              <button type="submit" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Selesaikan Permintaan
+              </button>
+            </form>
+          <% } %>
+
+          <% if (header.status === 'fulfilled') { %>
+            <a href="/admin/permintaan/<%= header.id %>/spb" target="_blank" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+              Cetak SPB
+            </a>
+          <% } %>
+        </div>
       </div>
+
+      <!-- Upload Receipt Section -->
+      <% if (['approved', 'fulfilled'].includes(header.status)) { %>
+        <div class="card mb-6" style="padding: 1.5rem;">
+          <h3 class="font-semibold text-sm mb-4 border-b pb-3">Bukti Penerimaan / Tanda Terima</h3>
+          <% if (receiptUrl) { %>
+            <div class="mb-4">
+              <a href="<%= receiptUrl %>" target="_blank" class="text-blue-600 underline">Lihat Bukti Terlampir</a>
+            </div>
+          <% } else { %>
+            <div class="mb-4 text-sm text-gray-500">Belum ada bukti yang diunggah.</div>
+          <% } %>
+          <form action="/admin/permintaan/<%= header.id %>/receipt" method="POST" enctype="multipart/form-data" class="flex items-center gap-3">
+            <div class="flex items-center gap-3 flex-1">
+              <label class="btn btn-primary cursor-pointer flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Pilih File
+                <input type="file" name="receipt_file" accept=".pdf,image/*" required class="hidden" id="receiptFileInput"/>
+              </label>
+              <span id="fileNameDisplay" class="text-sm text-gray-500 truncate max-w-xs">Belum ada file yang dipilih</span>
+            </div>
+            <button type="submit" class="btn btn-primary whitespace-nowrap shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Unggah Bukti
+            </button>
+          </form>
+        </div>
+
+        <script>
+          const fileInput = document.getElementById('receiptFileInput');
+          const fileNameDisplay = document.getElementById('fileNameDisplay');
+          if(fileInput && fileNameDisplay) {
+            fileInput.addEventListener('change', function(e) {
+              if (e.target.files.length > 0) {
+                fileNameDisplay.textContent = e.target.files[0].name;
+                fileNameDisplay.classList.remove('text-gray-500');
+                fileNameDisplay.classList.add('text-foreground', 'font-medium');
+              } else {
+                fileNameDisplay.textContent = 'Belum ada file yang dipilih';
+                fileNameDisplay.classList.add('text-gray-500');
+                fileNameDisplay.classList.remove('text-foreground', 'font-medium');
+              }
+            });
+          }
+        </script>
+      <% } %>
 
       <!-- ===== Daftar Barang ===== -->
       <div class="card overflow-hidden">
@@ -190,7 +271,7 @@
 
       <!-- ===== Approval Timeline ===== -->
       <% if (approvals && approvals.length > 0) { %>
-        <div class="card p-5">
+        <div class="card" style="padding: 1.5rem;">
           <h3 class="font-semibold text-sm mb-4 border-b pb-3">Riwayat Persetujuan</h3>
           <div class="space-y-6">
             <% approvals.forEach((appr, idx) => { %>
@@ -201,18 +282,18 @@
                 <% } %>
                 
                 <!-- Dot icon -->
-                <div class="absolute left-1 top-1 w-3 h-3 rounded-full border-2 border-background <%= appr.status === 'approved' ? 'bg-blue-500' : (appr.status === 'rejected' ? 'bg-red-500' : 'bg-green-500') %>"></div>
+                <div class="absolute left-1 top-1 w-3 h-3 rounded-full border-2 border-background" style="background-color: var(--color-primary);"></div>
                 
                 <div class="text-sm">
                   <p class="font-medium">
                     <%= appr.status === 'approved' ? 'Disetujui' : (appr.status === 'rejected' ? 'Ditolak' : appr.status) %>
                     <span class="text-muted-foreground font-normal ml-1">oleh <%= appr.approver_name %></span>
                   </p>
-                  <p class="text-xs text-muted-foreground mt-0.5">
+                  <p class="text-xs text-muted-foreground mt-0.5 mb-2">
                     <%= new Date(appr.action_date).toLocaleString('id-ID', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' }) %>
                   </p>
                   <% if (appr.notes) { %>
-                    <div class="mt-2 p-3 bg-muted rounded-md text-muted-foreground italic border-l-2 <%= appr.status === 'approved' ? 'border-l-blue-500' : 'border-l-red-500' %>">
+                    <div class="bg-muted rounded-md text-muted-foreground italic border-l-2" style="margin-top: 0.75rem; padding: 0.75rem; border-left-color: var(--color-primary);">
                       "<%= appr.notes %>"
                     </div>
                   <% } %>

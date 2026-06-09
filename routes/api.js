@@ -38,6 +38,9 @@ router.get("/permintaan", pegawaiApiAccess, apiController.listPermintaan);
 // GET /api/admin/permintaan -> daftar SEMUA permintaan (JSON)
 router.get("/admin/permintaan", adminApiAccess, apiController.adminListPermintaan);
 
+// GET /api/admin/permintaan/:id/spb -> Generate SPB (JSON metadata + PDF stream)
+router.get("/admin/permintaan/:id/spb", adminApiAccess, apiController.adminCetakSPB);
+
 // =====================================================================
 // FALLBACK: kalau endpoint tidak ditemukan, return JSON 404
 // (bukan render HTML error.ejs)
