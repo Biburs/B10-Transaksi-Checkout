@@ -10,9 +10,9 @@
 //   403 = Forbidden      (login OK tapi tidak punya hak akses)
 // =====================================================================
 
-/**
- * Cek user sudah login.
- * Kalau belum, return JSON 401.
+/*
+ Cek user sudah login.
+ Kalau belum, return JSON 401.
  */
 function apiIsAuthenticated(req, res, next) {
   if (req.session.userId) {
@@ -28,11 +28,10 @@ function apiIsAuthenticated(req, res, next) {
 }
 
 /**
- * Cek user punya salah satu role yang dibolehkan.
- * Pakai setelah apiIsAuthenticated.
- *
- * Contoh: apiRequireRole('pegawai')
- *         apiRequireRole('admin', 'admin_logistik')
+ Cek user punya salah satu role yang dibolehkan.
+ Pakai setelah apiIsAuthenticated.
+ Contoh: apiRequireRole('pegawai')
+ apiRequireRole('admin', 'admin_logistik')
  */
 function apiRequireRole(...roles) {
   return (req, res, next) => {
@@ -61,9 +60,9 @@ function apiRequireRole(...roles) {
   };
 }
 
-/**
- * Pastikan user punya record di tabel employees.
- * Tanpa ini, query yang butuh employee_id akan gagal.
+/*
+ Pastikan user punya record di tabel employees.
+ Tanpa ini, query yang butuh employee_id akan gagal.
  */
 function apiRequireEmployeeProfile(req, res, next) {
   if (!req.session.employeeId) {

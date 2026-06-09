@@ -11,13 +11,13 @@
     - formData        (object?) : data form sebelumnya (kalau ada error)
 -->
 
-<%- include('../partials/head', { title: title }) %>
+<%- include('../../partials/head', { title: title }) %>
 
 <body class="bg-background">
-  <%- include('../partials/sidebar', { user: user, userRole: userRole, activeMenu: 'buat' }) %>
+  <%- include('../../partials/sidebar', { user: user, userRole: userRole, activeMenu: 'buat' }) %>
 
   <main id="content">
-    <%- include('../partials/topbar', {
+    <%- include('../../partials/topbar', {
       pageTitle: 'Buat Permintaan Baru',
       pageSubtitle: 'Ajukan permintaan barang habis pakai untuk kebutuhan kerja Anda'
     }) %>
@@ -250,4 +250,4 @@
     }
   </script>
 
-<%- include('../partials/footer') %>
+<%- include('../../partials/footer') %>

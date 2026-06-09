@@ -1,12 +1,12 @@
 <!-- Fungsi: Daftar permintaan milik pegawai dengan search, filter, pagination-->
 
-<%- include('../partials/head', { title: title }) %>
+<%- include('../../partials/head', { title: title }) %>
 
 <body class="bg-background">
-  <%- include('../partials/sidebar', { user: user, userRole: userRole, activeMenu: 'permintaan' }) %>
+  <%- include('../../partials/sidebar', { user: user, userRole: userRole, activeMenu: 'permintaan' }) %>
 
   <main id="content">
-    <%- include('../partials/topbar', {
+    <%- include('../../partials/topbar', {
       pageTitle: 'Permintaan Saya',
       pageSubtitle: 'Daftar permintaan barang yang Anda ajukan'
     }) %>
@@ -240,4 +240,4 @@
     </div>
   </main>
 
-<%- include('../partials/footer') %>
+<%- include('../../partials/footer') %>

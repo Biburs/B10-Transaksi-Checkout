@@ -1,20 +1,6 @@
 // =====================================================================
 // Controller: API JSON endpoints
 // Berisi handler untuk endpoint API yang return JSON
-//
-// Konvensi response sukses:
-//   {
-//     "success": true,
-//     "data": [...],
-//     "pagination": {...},  (kalau pagination)
-//     "filters": {...}      (kalau ada filter aktif)
-//   }
-//
-// Konvensi response error:
-//   {
-//     "success": false,
-//     "error": { "code": "XXX", "message": "..." }
-//   }
 // =====================================================================
 
 const db = require("../lib/db");
@@ -23,12 +9,6 @@ const db = require("../lib/db");
 // GET /api/permintaan
 // Daftar permintaan milik pegawai yang login (dalam format JSON).
 // Mendukung pagination, search, dan filter status.
-//
-// Query params:
-//   ?page=1          (default 1)
-//   ?perPage=10      (default 10, max 100)
-//   ?search=         (cari di request_number atau nama item)
-//   ?status=         (pending|approved|rejected|fulfilled|cancelled|"")
 // ---------------------------------------------------------------------
 exports.listPermintaan = async (req, res) => {
   const employeeId = req.session.employeeId;

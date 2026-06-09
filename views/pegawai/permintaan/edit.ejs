@@ -13,13 +13,13 @@
     - formDataDate    (string?) : tanggal yang user input saat error
 -->
 
-<%- include('../partials/head', { title: title }) %>
+<%- include('../../partials/head', { title: title }) %>
 
 <body class="bg-background">
-  <%- include('../partials/sidebar', { user: user, userRole: userRole, activeMenu: 'permintaan' }) %>
+  <%- include('../../partials/sidebar', { user: user, userRole: userRole, activeMenu: 'permintaan' }) %>
 
   <main id="content">
-    <%- include('../partials/topbar', {
+    <%- include('../../partials/topbar', {
       pageTitle: 'Edit Permintaan',
       pageSubtitle: 'Ubah detail permintaan ' + request.request_number
     }) %>
@@ -236,4 +236,4 @@
     }
   </script>
 
-<%- include('../partials/footer') %>
+<%- include('../../partials/footer') %>

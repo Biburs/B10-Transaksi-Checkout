@@ -4,7 +4,7 @@
   Fungsi: Sidebar navigasi yang berubah isi menunya berdasarkan role
   Variabel yang dibutuhkan:
     - user      (string) : nama user
-    - userRole  (string) : 'pegawai' | 'admin_logistik' | 'admin'
+    - userRole  (string) : 'pegawai' | 'admin_logistik'
     - activeMenu (string): id menu yang sedang aktif (untuk highlight)
                             contoh: 'dashboard', 'permintaan', 'buat'
 -->
@@ -79,7 +79,7 @@
       <% } %>
 
       <!-- Group: Admin Logistik (untuk role admin_logistik / admin) -->
-      <% if (userRole === 'admin_logistik' || userRole === 'admin') { %>
+      <% if (userRole === 'admin_logistik') { %>
         <div role="group" aria-labelledby="group-admin">
           <h3 id="group-admin">Kelola Permintaan</h3>
           <ul>

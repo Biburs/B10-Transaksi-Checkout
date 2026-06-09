@@ -71,26 +71,25 @@ async function givePermissionToRole(roleId, permissionId) {
 
 async function seed() {
   try {
-    // 1. Buat 3 role
-    const adminRoleId = await ensureRole("admin");
+    console.log("\n=== SEED LOGIN (ROLES, USERS, PERMISSIONS) ===\n");
+
+    // 1. Buat 2 role
     const adminLogistikRoleId = await ensureRole("admin_logistik");
     const pegawaiRoleId = await ensureRole("pegawai");
-    console.log("✓ Role: admin =", adminRoleId, ", admin_logistik =", adminLogistikRoleId, ", pegawai =", pegawaiRoleId);
+    console.log(
+      "✓ Role: admin_logistik =", adminLogistikRoleId,
+      ", pegawai =", pegawaiRoleId
+    );
 
-    // 2. Buat permission contoh
+    // 2. Siapkan permission yang dipakai
     const manageUsersId = await ensurePermission("manage_users");
     const viewDashboardId = await ensurePermission("view_dashboard");
     console.log("✓ Permission disiapkan");
 
-    // 3. Buat 3 user (email & password sesuai kebutuhan project)
-    const adminUserId = await ensureUser(
-      "Administrator",
-      "admin@gmail.com",
-      "admin123"
-    );
+    // 3. Buat 2 user (email & password sesuai kebutuhan project)
     const adminLogistikUserId = await ensureUser(
       "Admin Logistik",
-      "admin.logistik@gmail.com",
+      "admin@gmail.com",
       "admin123"
     );
     const pegawaiUserId = await ensureUser(
@@ -98,29 +97,30 @@ async function seed() {
       "pegawai@gmail.com",
       "pegawai123"
     );
-    console.log("✓ User: admin =", adminUserId, ", admin_logistik =", adminLogistikUserId, ", pegawai =", pegawaiUserId);
+    console.log(
+      "✓ User: admin_logistik =", adminLogistikUserId,
+      ", pegawai =", pegawaiUserId
+    );
 
     // 4. Hubungkan user -> role
-    await assignRole(adminUserId, adminRoleId);
     await assignRole(adminLogistikUserId, adminLogistikRoleId);
     await assignRole(pegawaiUserId, pegawaiRoleId);
     console.log("✓ User dihubungkan ke role masing-masing");
 
     // 5. Atur permission per role
-    //    admin: bisa semua
-    await givePermissionToRole(adminRoleId, manageUsersId);
-    await givePermissionToRole(adminRoleId, viewDashboardId);
+    //    admin_logistik: kelola user + lihat dashboard
+    await givePermissionToRole(adminLogistikRoleId, manageUsersId);
+    await givePermissionToRole(adminLogistikRoleId, viewDashboardId);
     //    pegawai: hanya lihat dashboard
     await givePermissionToRole(pegawaiRoleId, viewDashboardId);
     console.log("✓ Permission tiap role diatur");
 
     console.log("\n=== SELESAI ===");
-    console.log("Akun admin          -> admin@gmail.com          / admin123");
-    console.log("Akun admin logistik -> admin.logistik@gmail.com / admin123");
-    console.log("Akun pegawai        -> pegawai@gmail.com        / pegawai123");
+    console.log("Akun admin logistik -> admin@gmail.com   / admin123");
+    console.log("Akun pegawai        -> pegawai@gmail.com / pegawai123");
     process.exit(0);
   } catch (err) {
-    console.error("Error saat seeding:", err.message);
+    console.error("\n❌ Error seeding login:", err);
     process.exit(1);
   }
 }
