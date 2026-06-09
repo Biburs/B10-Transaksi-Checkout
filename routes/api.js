@@ -24,15 +24,7 @@ const pegawaiApiAccess = [
 // Middleware chain untuk API admin logistik
 const adminApiAccess = [
   apiIsAuthenticated,
-  (req, res, next) => {
-    if (req.session.userRole === "admin_logistik" || req.session.userRole === "admin") {
-      return next();
-    }
-    return res.status(403).json({
-      success: false,
-      error: { code: "FORBIDDEN", message: "Akses ditolak" }
-    });
-  },
+  apiRequireRole("admin_logistik"),
   apiRequireEmployeeProfile,
 ];
 

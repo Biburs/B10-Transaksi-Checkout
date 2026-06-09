@@ -47,7 +47,7 @@ exports.formBaru = async (req, res, next) => {
     const items = await getItemsForDropdown();
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
-    res.render("permintaan/baru", {
+    res.render("pegawai/permintaan/baru", {
       title: "Buat Permintaan",
       user: req.session.userName,
       userRole: req.session.userRole,
@@ -151,7 +151,7 @@ exports.createPermintaan = async (req, res, next) => {
   if (errors.length > 0) {
     try {
       const items = await getItemsForDropdown();
-      return res.render("permintaan/baru", {
+      return res.render("pegawai/permintaan/baru", {
         title: "Buat Permintaan",
         user: req.session.userName,
         userRole: req.session.userRole,
@@ -298,7 +298,7 @@ exports.listPermintaan = async (req, res, next) => {
     );
 
     // ----- Render -----
-    res.render("permintaan/list", {
+    res.render("pegawai/permintaan/list", {
       title: "Permintaan Saya",
       user: req.session.userName,
       userRole: req.session.userRole,
@@ -414,7 +414,7 @@ exports.detailPermintaan = async (req, res, next) => {
     );
 
     // ----- Render -----
-   res.render("permintaan/detail", {
+   res.render("pegawai/permintaan/detail", {
       title: `Detail ${header.request_number}`,
       user: req.session.userName,
       userRole: req.session.userRole,
@@ -459,6 +459,8 @@ async function findEditablePermintaan(requestId, employeeId) {
     request: request,
   };
 }
+
+
 
 // ---------------------------------------------------------------------
 // GET /permintaan/:id/edit
@@ -506,7 +508,7 @@ exports.formEdit = async (req, res, next) => {
     // Ambil items master untuk dropdown
     const items = await getItemsForDropdown();
 
-    res.render("permintaan/edit", {
+    res.render("pegawai/permintaan/edit", {
       title: `Edit ${check.request.request_number}`,
       user: req.session.userName,
       userRole: req.session.userRole,
@@ -519,6 +521,8 @@ exports.formEdit = async (req, res, next) => {
     next(err);
   }
 };
+
+
 
 // ---------------------------------------------------------------------
 // POST /permintaan/:id/edit
@@ -610,7 +614,7 @@ exports.updatePermintaan = async (req, res, next) => {
       }
       const items = await getItemsForDropdown();
 
-      return res.render("permintaan/edit", {
+      return res.render("pegawai/permintaan/edit", {
         title: `Edit ${check.request.request_number}`,
         user: req.session.userName,
         userRole: req.session.userRole,
@@ -699,6 +703,8 @@ exports.updatePermintaan = async (req, res, next) => {
     connection.release();
   }
 };
+
+
 
 // ---------------------------------------------------------------------
 // POST /permintaan/:id/batal

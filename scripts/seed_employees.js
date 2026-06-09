@@ -113,20 +113,19 @@ async function seed() {
   try {
     console.log("\n=== SEED DATA MASTER KEPEGAWAIAN ===\n");
 
-    // 1. Cek prerequisite: user dari seed_login.js sudah ada
+ // 1. Cek prerequisite: user dari seed_login.js sudah ada
     console.log("[1/4] Cek prerequisite (user dari seed_login.js)...");
-    const adminUserId = await getUserIdByEmail("admin@gmail.com");
-    const adminLogistikUserId = await getUserIdByEmail("admin.logistik@gmail.com");
+    const adminLogistikUserId = await getUserIdByEmail("admin@gmail.com");
     const pegawaiUserId = await getUserIdByEmail("pegawai@gmail.com");
 
-    if (!adminUserId || !pegawaiUserId || !adminLogistikUserId) {
+    if (!adminLogistikUserId || !pegawaiUserId) {
       console.error(
-        "\n❌ ERROR: User admin@gmail.com, admin.logistik@gmail.com, atau pegawai@gmail.com tidak ditemukan."
+        "\n❌ ERROR: User admin@gmail.com atau pegawai@gmail.com tidak ditemukan."
       );
       console.error("   Jalankan dulu: node scripts/seed_login.js\n");
       process.exit(1);
     }
-    console.log(`  ✓ Admin user_id = ${adminUserId}, Admin Logistik user_id = ${adminLogistikUserId}, Pegawai user_id = ${pegawaiUserId}\n`);
+    console.log(`  ✓ Admin Logistik user_id = ${adminLogistikUserId}, Pegawai user_id = ${pegawaiUserId}\n`);
 
     // 2. Organization Units
     console.log("[2/4] Seed organization_units...");
@@ -165,11 +164,11 @@ async function seed() {
 
     // 4. Employees (profil untuk admin & pegawai user yang ada)
     console.log("[4/4] Seed employees...");
-    await ensureEmployee({
-      userId: adminUserId,
+   await ensureEmployee({
+      userId: adminLogistikUserId,
       employeeNumber: "ADM001",
       nationalId: "1371010101010001",
-      name: "Administrator",
+      name: "Admin Logistik",
       birthPlace: "Padang",
       birthDate: "1985-01-15",
       gender: "male",
@@ -179,24 +178,6 @@ async function seed() {
       phoneNumber: "081234567890",
       orgUnitId: ftiId,
       hireDate: "2015-08-01",
-      employmentStatusId: pnsId,
-    });
-    console.log(`  ✓ Employee admin (id=${adminUserId}) disiapkan`);
-
-    await ensureEmployee({
-      userId: adminLogistikUserId,
-      employeeNumber: "ADM002",
-      nationalId: "1371010101010002",
-      name: "Admin Logistik",
-      birthPlace: "Padang",
-      birthDate: "1986-02-16",
-      gender: "male",
-      religion: "Islam",
-      maritalStatus: "married",
-      address: "Jl. Kampus Limau Manis, Padang",
-      phoneNumber: "081234567891",
-      orgUnitId: ftiId,
-      hireDate: "2016-08-01",
       employmentStatusId: pnsId,
     });
     console.log(`  ✓ Employee admin_logistik (id=${adminLogistikUserId}) disiapkan`);

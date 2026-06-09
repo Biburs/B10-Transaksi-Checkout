@@ -13,13 +13,13 @@
     - totalQuantity    (number)  : total kuantitas semua item
 -->
 
-<%- include('../partials/head', { title: title }) %>
+<%- include('../../partials/head', { title: title }) %>
 
 <body class="bg-background">
-  <%- include('../partials/sidebar', { user: user, userRole: userRole, activeMenu: 'permintaan' }) %>
+  <%- include('../../partials/sidebar', { user: user, userRole: userRole, activeMenu: 'permintaan' }) %>
 
   <main id="content">
-    <%- include('../partials/topbar', {
+    <%- include('../../partials/topbar', {
       pageTitle: header.request_number,
       pageSubtitle: 'Detail permintaan barang'
     }) %>
@@ -301,4 +301,4 @@
     </div>
   </main>
 
-<%- include('../partials/footer') %>
+<%- include('../../partials/footer') %>
