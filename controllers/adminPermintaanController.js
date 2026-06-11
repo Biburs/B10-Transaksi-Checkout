@@ -172,12 +172,12 @@ exports.detailPermintaan = async (req, res, next) => {
     const totalQuantity = detailRows.reduce((sum, d) => sum + (d.quantity || 0), 0);
 
     const getReceiptFile = (requestId) => {
-      const dir = path.join(__dirname, "../public/uploads/receipts");
+      const dir = path.join(__dirname, "../uploads/receipts");
       const allowed = [".pdf", ".jpg", ".jpeg", ".png"];
       for (const ext of allowed) {
         const file = path.join(dir, `receipt_${requestId}${ext}`);
         if (fs.existsSync(file)) {
-          return `/uploads/receipts/receipt_${requestId}${ext}`;
+          return `/admin/permintaan/${requestId}/receipt-file`;
         }
       }
       return null;
@@ -455,35 +455,38 @@ exports.approvePermintaan = async (req, res, next) => {
   const { notes } = req.body;
   const approverId = req.session.employeeId;
 
+  const connection = await db.getConnection();
   try {
-    await db.query("START TRANSACTION");
+    await connection.beginTransaction();
 
-    const [rows] = await db.query("SELECT status FROM inventory_requests WHERE id = ? FOR UPDATE", [requestId]);
+    const [rows] = await connection.query("SELECT status FROM inventory_requests WHERE id = ? FOR UPDATE", [requestId]);
     if (rows.length === 0) {
-      await db.query("ROLLBACK");
+      await connection.rollback();
       return res.status(404).render("error", { message: "Permintaan tidak ditemukan", error: { status: 404, stack: "" } });
     }
 
     if (rows[0].status !== "pending") {
-      await db.query("ROLLBACK");
+      await connection.rollback();
       return res.status(400).render("error", { message: "Hanya permintaan pending yang dapat disetujui", error: { status: 400, stack: "" } });
     }
 
-    await db.query(
+    await connection.query(
       "UPDATE inventory_requests SET status = 'approved', approved_by = ?, approved_at = NOW(), updated_at = NOW() WHERE id = ?",
       [approverId, requestId]
     );
 
-    await db.query(
+    await connection.query(
       "INSERT INTO inventory_request_approvals (inventory_request_id, approver_id, status, notes, action_date, employee_id, created_at, updated_at) VALUES (?, ?, 'approved', ?, NOW(), ?, NOW(), NOW())",
       [requestId, approverId, notes || "", approverId]
     );
 
-    await db.query("COMMIT");
+    await connection.commit();
     res.redirect(`/admin/permintaan/${requestId}?approved=1`);
   } catch (err) {
-    await db.query("ROLLBACK");
+    await connection.rollback();
     next(err);
+  } finally {
+    connection.release();
   }
 };
 
@@ -495,35 +498,38 @@ exports.rejectPermintaan = async (req, res, next) => {
   const { notes } = req.body;
   const approverId = req.session.employeeId;
 
+  const connection = await db.getConnection();
   try {
-    await db.query("START TRANSACTION");
+    await connection.beginTransaction();
 
-    const [rows] = await db.query("SELECT status FROM inventory_requests WHERE id = ? FOR UPDATE", [requestId]);
+    const [rows] = await connection.query("SELECT status FROM inventory_requests WHERE id = ? FOR UPDATE", [requestId]);
     if (rows.length === 0) {
-      await db.query("ROLLBACK");
+      await connection.rollback();
       return res.status(404).render("error", { message: "Permintaan tidak ditemukan", error: { status: 404, stack: "" } });
     }
 
     if (rows[0].status !== "pending") {
-      await db.query("ROLLBACK");
+      await connection.rollback();
       return res.status(400).render("error", { message: "Hanya permintaan pending yang dapat ditolak", error: { status: 400, stack: "" } });
     }
 
-    await db.query(
+    await connection.query(
       "UPDATE inventory_requests SET status = 'rejected', approved_by = ?, approved_at = NOW(), updated_at = NOW() WHERE id = ?",
       [approverId, requestId]
     );
 
-    await db.query(
+    await connection.query(
       "INSERT INTO inventory_request_approvals (inventory_request_id, approver_id, status, notes, action_date, employee_id, created_at, updated_at) VALUES (?, ?, 'rejected', ?, NOW(), ?, NOW(), NOW())",
       [requestId, approverId, notes || "", approverId]
     );
 
-    await db.query("COMMIT");
+    await connection.commit();
     res.redirect(`/admin/permintaan/${requestId}?rejected=1`);
   } catch (err) {
-    await db.query("ROLLBACK");
+    await connection.rollback();
     next(err);
+  } finally {
+    connection.release();
   }
 };
 
@@ -533,32 +539,35 @@ exports.rejectPermintaan = async (req, res, next) => {
 exports.cancelDecision = async (req, res, next) => {
   const requestId = parseInt(req.params.id, 10);
 
+  const connection = await db.getConnection();
   try {
-    await db.query("START TRANSACTION");
+    await connection.beginTransaction();
 
-    const [rows] = await db.query("SELECT status FROM inventory_requests WHERE id = ? FOR UPDATE", [requestId]);
+    const [rows] = await connection.query("SELECT status FROM inventory_requests WHERE id = ? FOR UPDATE", [requestId]);
     if (rows.length === 0) {
-      await db.query("ROLLBACK");
+      await connection.rollback();
       return res.status(404).render("error", { message: "Permintaan tidak ditemukan", error: { status: 404, stack: "" } });
     }
 
     if (rows[0].status !== "approved" && rows[0].status !== "rejected") {
-      await db.query("ROLLBACK");
+      await connection.rollback();
       return res.status(400).render("error", { message: "Hanya keputusan setuju/tolak yang dapat dibatalkan", error: { status: 400, stack: "" } });
     }
 
-    await db.query(
+    await connection.query(
       "UPDATE inventory_requests SET status = 'pending', approved_by = NULL, approved_at = NULL, updated_at = NOW() WHERE id = ?",
       [requestId]
     );
 
-    await db.query("DELETE FROM inventory_request_approvals WHERE inventory_request_id = ?", [requestId]);
+    await connection.query("DELETE FROM inventory_request_approvals WHERE inventory_request_id = ?", [requestId]);
 
-    await db.query("COMMIT");
+    await connection.commit();
     res.redirect(`/admin/permintaan/${requestId}`);
   } catch (err) {
-    await db.query("ROLLBACK");
+    await connection.rollback();
     next(err);
+  } finally {
+    connection.release();
   }
 };
 
@@ -568,30 +577,33 @@ exports.cancelDecision = async (req, res, next) => {
 exports.completePermintaan = async (req, res, next) => {
   const requestId = parseInt(req.params.id, 10);
 
+  const connection = await db.getConnection();
   try {
-    await db.query("START TRANSACTION");
+    await connection.beginTransaction();
 
-    const [rows] = await db.query("SELECT status FROM inventory_requests WHERE id = ? FOR UPDATE", [requestId]);
+    const [rows] = await connection.query("SELECT status FROM inventory_requests WHERE id = ? FOR UPDATE", [requestId]);
     if (rows.length === 0) {
-      await db.query("ROLLBACK");
+      await connection.rollback();
       return res.status(404).render("error", { message: "Permintaan tidak ditemukan", error: { status: 404, stack: "" } });
     }
 
     if (rows[0].status !== "approved") {
-      await db.query("ROLLBACK");
+      await connection.rollback();
       return res.status(400).render("error", { message: "Hanya permintaan disetujui yang dapat diselesaikan", error: { status: 400, stack: "" } });
     }
 
-    await db.query(
+    await connection.query(
       "UPDATE inventory_requests SET status = 'fulfilled', updated_at = NOW() WHERE id = ?",
       [requestId]
     );
 
-    await db.query("COMMIT");
+    await connection.commit();
     res.redirect(`/admin/permintaan/${requestId}`);
   } catch (err) {
-    await db.query("ROLLBACK");
+    await connection.rollback();
     next(err);
+  } finally {
+    connection.release();
   }
 };
 
@@ -600,12 +612,18 @@ exports.completePermintaan = async (req, res, next) => {
 // ---------------------------------------------------------------------
 exports.uploadReceipt = async (req, res, next) => {
   const requestId = parseInt(req.params.id, 10);
-  if (!req.file) {
-    return res.status(400).render("error", { message: "Pilih file terlebih dahulu", error: { status: 400, stack: "" } });
-  }
 
   try {
-    const dir = path.join(__dirname, "../public/uploads/receipts");
+    const [rows] = await db.query("SELECT status FROM inventory_requests WHERE id = ?", [requestId]);
+    if (rows.length === 0 || !["approved", "fulfilled"].includes(rows[0].status)) {
+      return res.status(400).render("error", { message: "Hanya permintaan dengan status disetujui/selesai yang dapat mengunggah bukti.", error: { status: 400, stack: "" } });
+    }
+
+    if (!req.file) {
+      return res.status(400).render("error", { message: "Pilih file terlebih dahulu", error: { status: 400, stack: "" } });
+    }
+
+    const dir = path.join(__dirname, "../uploads/receipts");
     const allowed = [".pdf", ".jpg", ".jpeg", ".png"];
     allowed.forEach(ext => {
       if (ext !== path.extname(req.file.filename).toLowerCase()) {
@@ -620,6 +638,22 @@ exports.uploadReceipt = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+// ---------------------------------------------------------------------
+// GET /admin/permintaan/:id/receipt-file
+// ---------------------------------------------------------------------
+exports.downloadReceipt = (req, res, next) => {
+  const requestId = parseInt(req.params.id, 10);
+  const dir = path.join(__dirname, "../uploads/receipts");
+  const allowed = [".pdf", ".jpg", ".jpeg", ".png"];
+  for (const ext of allowed) {
+    const file = path.join(dir, `receipt_${requestId}${ext}`);
+    if (fs.existsSync(file)) {
+      return res.sendFile(file);
+    }
+  }
+  return res.status(404).render("error", { message: "File tanda terima tidak ditemukan", error: { status: 404, stack: "" } });
 };
 
 // ---------------------------------------------------------------------
