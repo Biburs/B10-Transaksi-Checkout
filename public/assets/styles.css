@@ -6306,3 +6306,7 @@ code.hljs {
     }
   }
 }
+
+/* Tailwind utility classes that were purged */
+.p-6 { padding: 1.5rem; }
+

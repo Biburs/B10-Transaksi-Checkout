@@ -508,3 +508,167 @@ function renderPdfSPB(doc, header, details) {
   doc.font("Helvetica-Oblique").fontSize(8).fillColor("#6b7280")
      .text(`Dokumen ini dicetak pada ${new Date().toLocaleString("id-ID")} dari FTI Sistem Logistik`, leftX, 775, { align: "center", width: contentW });
 }
+
+// ---------------------------------------------------------------------
+// POST /api/admin/permintaan/:id/approve
+// ---------------------------------------------------------------------
+exports.apiAdminApprove = async (req, res) => {
+  const requestId = parseInt(req.params.id, 10);
+  const { notes } = req.body;
+  const approverId = req.session.employeeId;
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [rows] = await connection.query("SELECT status FROM inventory_requests WHERE id = ? FOR UPDATE", [requestId]);
+    if (rows.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, error: { message: "Permintaan tidak ditemukan" } });
+    }
+
+    if (rows[0].status !== "pending") {
+      await connection.rollback();
+      return res.status(400).json({ success: false, error: { message: "Hanya permintaan pending yang dapat disetujui" } });
+    }
+
+    await connection.query(
+      "UPDATE inventory_requests SET status = 'approved', approved_by = ?, approved_at = NOW(), updated_at = NOW() WHERE id = ?",
+      [approverId, requestId]
+    );
+
+    await connection.query(
+      "INSERT INTO inventory_request_approvals (inventory_request_id, approver_id, status, notes, action_date, employee_id, created_at, updated_at) VALUES (?, ?, 'approved', ?, NOW(), ?, NOW(), NOW())",
+      [requestId, approverId, notes || "", approverId]
+    );
+
+    await connection.commit();
+    return res.json({ success: true, data: { id: requestId, status: "approved" } });
+  } catch (err) {
+    await connection.rollback();
+    console.error("API Error - apiAdminApprove:", err);
+    return res.status(500).json({ success: false, error: { message: "Terjadi kesalahan internal" } });
+  } finally {
+    connection.release();
+  }
+};
+
+// ---------------------------------------------------------------------
+// POST /api/admin/permintaan/:id/reject
+// ---------------------------------------------------------------------
+exports.apiAdminReject = async (req, res) => {
+  const requestId = parseInt(req.params.id, 10);
+  const { notes } = req.body;
+  const approverId = req.session.employeeId;
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [rows] = await connection.query("SELECT status FROM inventory_requests WHERE id = ? FOR UPDATE", [requestId]);
+    if (rows.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, error: { message: "Permintaan tidak ditemukan" } });
+    }
+
+    if (rows[0].status !== "pending") {
+      await connection.rollback();
+      return res.status(400).json({ success: false, error: { message: "Hanya permintaan pending yang dapat ditolak" } });
+    }
+
+    await connection.query(
+      "UPDATE inventory_requests SET status = 'rejected', approved_by = ?, approved_at = NOW(), updated_at = NOW() WHERE id = ?",
+      [approverId, requestId]
+    );
+
+    await connection.query(
+      "INSERT INTO inventory_request_approvals (inventory_request_id, approver_id, status, notes, action_date, employee_id, created_at, updated_at) VALUES (?, ?, 'rejected', ?, NOW(), ?, NOW(), NOW())",
+      [requestId, approverId, notes || "", approverId]
+    );
+
+    await connection.commit();
+    return res.json({ success: true, data: { id: requestId, status: "rejected" } });
+  } catch (err) {
+    await connection.rollback();
+    console.error("API Error - apiAdminReject:", err);
+    return res.status(500).json({ success: false, error: { message: "Terjadi kesalahan internal" } });
+  } finally {
+    connection.release();
+  }
+};
+
+// ---------------------------------------------------------------------
+// POST /api/admin/permintaan/:id/cancel-decision
+// ---------------------------------------------------------------------
+exports.apiAdminCancelDecision = async (req, res) => {
+  const requestId = parseInt(req.params.id, 10);
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [rows] = await connection.query("SELECT status FROM inventory_requests WHERE id = ? FOR UPDATE", [requestId]);
+    if (rows.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, error: { message: "Permintaan tidak ditemukan" } });
+    }
+
+    if (rows[0].status !== "approved" && rows[0].status !== "rejected") {
+      await connection.rollback();
+      return res.status(400).json({ success: false, error: { message: "Hanya keputusan setuju/tolak yang dapat dibatalkan" } });
+    }
+
+    await connection.query(
+      "UPDATE inventory_requests SET status = 'pending', approved_by = NULL, approved_at = NULL, updated_at = NOW() WHERE id = ?",
+      [requestId]
+    );
+
+    await connection.query("DELETE FROM inventory_request_approvals WHERE inventory_request_id = ?", [requestId]);
+
+    await connection.commit();
+    return res.json({ success: true, data: { id: requestId, status: "pending" } });
+  } catch (err) {
+    await connection.rollback();
+    console.error("API Error - apiAdminCancelDecision:", err);
+    return res.status(500).json({ success: false, error: { message: "Terjadi kesalahan internal" } });
+  } finally {
+    connection.release();
+  }
+};
+
+// ---------------------------------------------------------------------
+// POST /api/admin/permintaan/:id/complete
+// ---------------------------------------------------------------------
+exports.apiAdminComplete = async (req, res) => {
+  const requestId = parseInt(req.params.id, 10);
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [rows] = await connection.query("SELECT status FROM inventory_requests WHERE id = ? FOR UPDATE", [requestId]);
+    if (rows.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, error: { message: "Permintaan tidak ditemukan" } });
+    }
+
+    if (rows[0].status !== "approved") {
+      await connection.rollback();
+      return res.status(400).json({ success: false, error: { message: "Hanya permintaan disetujui yang dapat diselesaikan" } });
+    }
+
+    await connection.query(
+      "UPDATE inventory_requests SET status = 'fulfilled', updated_at = NOW() WHERE id = ?",
+      [requestId]
+    );
+
+    await connection.commit();
+    return res.json({ success: true, data: { id: requestId, status: "fulfilled" } });
+  } catch (err) {
+    await connection.rollback();
+    console.error("API Error - apiAdminComplete:", err);
+    return res.status(500).json({ success: false, error: { message: "Terjadi kesalahan internal" } });
+  } finally {
+    connection.release();
+  }
+};

@@ -10,7 +10,7 @@ const { requireRole, requireEmployeeProfile } = require("../middlewares/role");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const dir = path.join(__dirname, "../public/uploads/receipts");
+    const dir = path.join(__dirname, "../uploads/receipts");
     if (!fs.existsSync(dir)){
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -22,7 +22,22 @@ const storage = multer.diskStorage({
     cb(null, `receipt_${requestId}${ext}`);
   }
 });
-const upload = multer({ storage: storage });
+
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: function (req, file, cb) {
+    const allowed = [".pdf", ".jpg", ".jpeg", ".png"];
+    const mimeTypes = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
+    const ext = path.extname(file.originalname).toLowerCase();
+    
+    if (allowed.includes(ext) && mimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("File type not allowed"));
+    }
+  }
+});
 
 // Middleware chain: hanya admin_logistik yang boleh akses
 const adminAccess = [
@@ -46,6 +61,7 @@ router.post("/:id/reject", adminAccess, adminPermintaanController.rejectPerminta
 router.post("/:id/cancel-decision", adminAccess, adminPermintaanController.cancelDecision);
 router.post("/:id/complete", adminAccess, adminPermintaanController.completePermintaan);
 router.post("/:id/receipt", adminAccess, upload.single("receipt_file"), adminPermintaanController.uploadReceipt);
+router.get("/:id/receipt-file", adminAccess, adminPermintaanController.downloadReceipt);
 router.get("/:id/spb", adminAccess, adminPermintaanController.cetakSuratPenyerahanBarang);
 
 module.exports = router;
