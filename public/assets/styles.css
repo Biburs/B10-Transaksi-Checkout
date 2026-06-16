@@ -2302,7 +2302,7 @@
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(100% 0.00011 271.152);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.269 0 0);
@@ -6309,4 +6309,79 @@ code.hljs {
 
 /* Tailwind utility classes that were purged */
 .p-6 { padding: 1.5rem; }
+
+
+/* Badge Custom Colors */
+.badge-pending { background-color: #facc15; color: #000000; }
+.badge-fulfilled { background-color: #22c55e; color: #ffffff; }
+.badge-rejected { background-color: #ef4444; color: #ffffff; }
+.badge-approved { background-color: #3b82f6; color: #ffffff; }
+.badge-cancelled { background-color: #6b7280; color: #ffffff; }
+.dark .badge-pending { background-color: #ca8a04; color: #ffffff; }
+.dark .badge-fulfilled { background-color: #16a34a; color: #ffffff; }
+.dark .badge-rejected { background-color: #dc2626; color: #ffffff; }
+.dark .badge-approved { background-color: #2563eb; color: #ffffff; }
+.dark .badge-cancelled { background-color: #4b5563; color: #ffffff; }
+
+
+/* Sidebar Custom Theme Inversion */
+:root {
+  --sidebar: oklch(0.15 0 0); /* Sangat gelap/hampir hitam */
+  --sidebar-foreground: oklch(0.98 0 0); /* Putih */
+  --sidebar-border: oklch(0.25 0 0);
+}
+
+.dark {
+  --sidebar: oklch(1 0 0); /* Putih bersih */
+  --sidebar-foreground: oklch(0.1 0 0); /* Hitam */
+  --sidebar-border: oklch(0.85 0 0);
+}
+
+
+.sidebar { background-color: var(--sidebar); color: var(--sidebar-foreground); }
+.sidebar * { border-color: var(--sidebar-border); }
+
+
+/* Inverted Sidebar Logic (Issue Fix) */
+:root {
+  --inv-sidebar-bg: #000000;
+  --inv-sidebar-text: #ffffff;
+  --inv-sidebar-hover-bg: #1f2937;
+  --inv-sidebar-border: #374151;
+}
+html.dark {
+  --inv-sidebar-bg: #ffffff;
+  --inv-sidebar-text: #000000;
+  --inv-sidebar-hover-bg: #f3f4f6;
+  --inv-sidebar-border: #e5e7eb;
+}
+.sidebar {
+  background-color: var(--inv-sidebar-bg) !important;
+  color: var(--inv-sidebar-text) !important;
+  border-right-color: var(--inv-sidebar-border) !important;
+}
+.sidebar a, .sidebar h3, .sidebar span, .sidebar svg, .sidebar div {
+  color: var(--inv-sidebar-text) !important;
+}
+.sidebar .text-muted-foreground {
+  opacity: 0.7 !important;
+}
+.sidebar a:hover {
+  background-color: var(--inv-sidebar-hover-bg) !important;
+}
+.sidebar a[aria-current="page"] {
+  background-color: var(--inv-sidebar-hover-bg) !important;
+  font-weight: 600 !important;
+}
+.sidebar .bg-sidebar-primary {
+  background-color: var(--inv-sidebar-text) !important;
+  color: var(--inv-sidebar-bg) !important;
+}
+.sidebar .bg-sidebar-primary svg {
+  color: var(--inv-sidebar-bg) !important;
+}
+.sidebar .bg-muted {
+  background-color: var(--inv-sidebar-hover-bg) !important;
+  color: var(--inv-sidebar-text) !important;
+}
 
