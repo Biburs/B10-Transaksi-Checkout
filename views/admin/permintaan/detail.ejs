@@ -86,6 +86,13 @@
               <h2 class="font-semibold text-foreground">Detail Permintaan</h2>
             </div>
             <%
+              const statusColors = {
+                pending:   'badge-pending',
+                approved:  'badge-approved',
+                rejected:  'badge-rejected',
+                fulfilled: 'badge-fulfilled',
+                cancelled: 'badge-cancelled'
+              };
               const statusLabels = {
                 pending: 'Menunggu',
                 approved: 'Disetujui',
@@ -94,7 +101,7 @@
                 cancelled: 'Dibatalkan'
               };
             %>
-            <span class="badge" style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; background-color: var(--color-primary); color: var(--color-primary-foreground);">
+            <span class="badge <%= statusColors[header.status] || 'bg-gray-100 text-gray-800' %>" style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500;">
               <%= statusLabels[header.status] || header.status %>
             </span>
           </div>
