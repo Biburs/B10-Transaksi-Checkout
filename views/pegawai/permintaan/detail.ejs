@@ -78,11 +78,13 @@
             Edit
         </a>
 
-        <!-- Tombol Batalkan: pakai form POST dengan konfirmasi JS -->
-        <form action="/permintaan/<%= header.id %>/batal" method="POST" 
-                onsubmit="return confirm('Anda yakin ingin membatalkan permintaan ini? Tindakan ini tidak bisa dibatalkan.');"
-                style="display: inline;">
-            <button type="submit" class="btn-outline text-red-600 dark:text-red-400">
+        <!-- Tombol Batalkan: pakai modal konfirmasi (data-confirm-*) -->
+        <form action="/permintaan/<%= header.id %>/batal" method="POST" style="display: inline;">
+            <button type="submit" class="btn-outline text-red-600 dark:text-red-400"
+                    data-confirm-title="Batalkan Permintaan?"
+                    data-confirm-message="Permintaan akan dibatalkan. Tindakan ini tidak bisa dikembalikan."
+                    data-confirm-label="Ya, Batalkan"
+                    data-confirm-variant="destructive">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />

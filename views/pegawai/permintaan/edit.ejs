@@ -219,10 +219,18 @@
       renumberRows();
     }
 
-    function removeRow(btn) {
+function removeRow(btn) {
       const rows = document.querySelectorAll(".item-row");
       if (rows.length <= 1) {
-        alert("Minimal 1 baris barang harus ada");
+        document.dispatchEvent(new CustomEvent("basecoat:toast", {
+          detail: {
+            config: {
+              category: "warning",
+              title: "Tidak bisa dihapus",
+              description: "Minimal 1 baris barang harus ada"
+            }
+          }
+        }));
         return;
       }
       btn.closest(".item-row").remove();

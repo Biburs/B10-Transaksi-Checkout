@@ -152,9 +152,14 @@
           <% } %>
 
           <% if (header.status === 'approved' || header.status === 'rejected') { %>
+            
             <!-- Batalkan Keputusan -->
-            <form action="/admin/permintaan/<%= header.id %>/cancel-decision" method="POST" class="inline-flex" onsubmit="return confirm('Yakin ingin membatalkan keputusan ini? Status akan kembali menjadi pending.');">
-              <button type="submit" class="btn btn-primary">
+            <form action="/admin/permintaan/<%= header.id %>/cancel-decision" method="POST" class="inline-flex">
+              <button type="submit" class="btn btn-primary"
+                      data-confirm-title="Batalkan Keputusan?"
+                      data-confirm-message="Status permintaan akan kembali menjadi pending. Pastikan tindakan ini diperlukan."
+                      data-confirm-label="Ya, Batalkan Keputusan"
+                      data-confirm-variant="destructive">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                 Batalkan Keputusan
               </button>
@@ -167,9 +172,14 @@
           <% } %>
 
           <% if (header.status === 'approved') { %>
-            <!-- Selesaikan (Complete) -->
-            <form action="/admin/permintaan/<%= header.id %>/complete" method="POST" class="inline-flex" onsubmit="return confirm('Selesaikan permintaan ini?');">
-              <button type="submit" class="btn btn-primary">
+            
+          <!-- Selesaikan (Complete) -->
+            <form action="/admin/permintaan/<%= header.id %>/complete" method="POST" class="inline-flex">
+              <button type="submit" class="btn btn-primary"
+                      data-confirm-title="Selesaikan Permintaan?"
+                      data-confirm-message="Permintaan akan ditandai sebagai selesai (fulfilled). Setelah ini Anda bisa mengupload tanda terima."
+                      data-confirm-label="Ya, Selesaikan"
+                      data-confirm-variant="success">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 Selesaikan Permintaan
               </button>

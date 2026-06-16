@@ -117,15 +117,16 @@ async function seed() {
     console.log("[1/4] Cek prerequisite (user dari seed_login.js)...");
     const adminLogistikUserId = await getUserIdByEmail("admin@gmail.com");
     const pegawaiUserId = await getUserIdByEmail("pegawai@gmail.com");
+    const pegawai2UserId = await getUserIdByEmail("pegawai2@gmail.com");
 
-    if (!adminLogistikUserId || !pegawaiUserId) {
+    if (!adminLogistikUserId || !pegawaiUserId || !pegawai2UserId) {
       console.error(
-        "\n❌ ERROR: User admin@gmail.com atau pegawai@gmail.com tidak ditemukan."
+        "\n❌ ERROR: User admin@gmail.com, pegawai@gmail.com, atau pegawai2@gmail.com tidak ditemukan."
       );
       console.error("   Jalankan dulu: node scripts/seed_login.js\n");
       process.exit(1);
     }
-    console.log(`  ✓ Admin Logistik user_id = ${adminLogistikUserId}, Pegawai user_id = ${pegawaiUserId}\n`);
+    console.log(`  ✓ Admin Logistik = ${adminLogistikUserId}, Pegawai 1 = ${pegawaiUserId}, Pegawai 2 = ${pegawai2UserId}\n`);
 
     // 2. Organization Units
     console.log("[2/4] Seed organization_units...");
@@ -199,6 +200,24 @@ async function seed() {
       employmentStatusId: honorerId,
     });
     console.log(`  ✓ Employee pegawai (id=${pegawaiUserId}) disiapkan\n`);
+
+    await ensureEmployee({
+      userId: pegawai2UserId,
+      employeeNumber: "PEG002",
+      nationalId: "1371030404040004",
+      name: "Pegawai Dua",
+      birthPlace: "Padang",
+      birthDate: "1992-03-25",
+      gender: "female",
+      religion: "Islam",
+      maritalStatus: "single",
+      address: "Jl. Pegawai Dua No. 2, Padang",
+      phoneNumber: "082345678901",
+      orgUnitId: ftiId,
+      hireDate: "2018-05-15",
+      employmentStatusId: pnsId,
+    });
+    console.log(`  ✓ Employee pegawai 2 (id=${pegawai2UserId}) disiapkan`);
 
     console.log("=== SELESAI ===");
     console.log("Data master kepegawaian sudah siap.");
