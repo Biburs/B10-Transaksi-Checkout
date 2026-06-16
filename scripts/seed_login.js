@@ -86,7 +86,7 @@ async function seed() {
     const viewDashboardId = await ensurePermission("view_dashboard");
     console.log("✓ Permission disiapkan");
 
-    // 3. Buat 2 user (email & password sesuai kebutuhan project)
+   // 3. Buat 3 user (email & password sesuai kebutuhan project)
     const adminLogistikUserId = await ensureUser(
       "Admin Logistik",
       "admin@gmail.com",
@@ -97,14 +97,21 @@ async function seed() {
       "pegawai@gmail.com",
       "pegawai123"
     );
+    const pegawai2UserId = await ensureUser(
+      "Pegawai Dua",
+      "pegawai2@gmail.com",
+      "pegawai123"
+    );
     console.log(
       "✓ User: admin_logistik =", adminLogistikUserId,
-      ", pegawai =", pegawaiUserId
+      ", pegawai =", pegawaiUserId,
+      ", pegawai2 =", pegawai2UserId
     );
 
     // 4. Hubungkan user -> role
     await assignRole(adminLogistikUserId, adminLogistikRoleId);
     await assignRole(pegawaiUserId, pegawaiRoleId);
+    await assignRole(pegawai2UserId, pegawaiRoleId);
     console.log("✓ User dihubungkan ke role masing-masing");
 
     // 5. Atur permission per role
@@ -116,8 +123,9 @@ async function seed() {
     console.log("✓ Permission tiap role diatur");
 
     console.log("\n=== SELESAI ===");
-    console.log("Akun admin logistik -> admin@gmail.com   / admin123");
-    console.log("Akun pegawai        -> pegawai@gmail.com / pegawai123");
+    console.log("Akun admin logistik -> admin@gmail.com    / admin123");
+    console.log("Akun pegawai 1      -> pegawai@gmail.com  / pegawai123");
+    console.log("Akun pegawai 2      -> pegawai2@gmail.com / pegawai123");
     process.exit(0);
   } catch (err) {
     console.error("\n❌ Error seeding login:", err);
