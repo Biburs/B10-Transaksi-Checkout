@@ -1,8 +1,15 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+/* Custom styles */
+/* Sidebar kiri selalu navy, terlepas dari mode light/dark */
+.sidebar {
+  background-color: #1E243D !important;
+  color: #ffffff !important;
 }
 
-a {
-  color: #00B7FF;
+.sidebar a,
+.sidebar h3,
+.sidebar span,
+.sidebar svg,
+.sidebar div {
+  color: #ffffff !important;
 }
+

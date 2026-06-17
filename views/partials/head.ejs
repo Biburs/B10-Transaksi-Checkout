@@ -57,6 +57,28 @@
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
     <link rel="stylesheet" href="/assets/styles.css" />
 
+    <style>
+      /* Memaksa warna sidebar HANYA setelah login (elemen dengan id "sidebar") */
+      :root, html.dark {
+        --sidebar: #1E243D;
+        --sidebar-foreground: #ffffff;
+      }
+      #sidebar,
+      .sidebar {
+        background-color: #1E243D !important;
+        color: #ffffff !important;
+      }
+      #sidebar a, #sidebar span, #sidebar h3, #sidebar div {
+        color: #ffffff !important;
+      }
+      #sidebar .bg-muted {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+      }
+      #sidebar .text-muted-foreground {
+        color: rgba(255, 255, 255, 0.7) !important;
+      }
+    </style>
+
     <!-- Basecoat UI components -->
     <script src="/assets/js/basecoat.js?v=0.3.11" defer></script>
     <script src="/assets/js/sidebar.js?v=0.3.11" defer></script>
