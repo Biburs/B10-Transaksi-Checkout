@@ -14,6 +14,13 @@ async function seedRequestThenLoginAdmin(page) {
   return reqNumber;
 }
 
+// Setujui permintaan yang detailnya sedang terbuka (status pending → approved).
+async function approveOpenRequest(page) {
+  await page.fill('input[placeholder*="Catatan persetujuan"]', "Disetujui untuk test workflow");
+  await page.getByRole("button", { name: "Setujui" }).click();
+  await expect(page.getByText("Permintaan disetujui!")).toBeVisible();
+}
+
 // Cari permintaan via search box admin lalu buka detailnya.
 async function openAdminDetail(page, reqNumber) {
   await page.goto("/admin/permintaan");
@@ -55,5 +62,33 @@ test.describe("Admin — Permintaan", () => {
 
     await expect(page.getByText("Permintaan ditolak.")).toBeVisible();
     await expect(page.locator(".badge", { hasText: "Ditolak" })).toBeVisible();
+  });
+
+  test("admin membatalkan keputusan mengembalikan status ke Menunggu", async ({ page }) => {
+    const reqNumber = await seedRequestThenLoginAdmin(page);
+    await openAdminDetail(page, reqNumber);
+    await approveOpenRequest(page);
+
+    // Batalkan keputusan (confirm dialog destructive).
+    await page.getByRole("button", { name: "Batalkan Keputusan" }).click();
+    await expect(page.locator("#confirmDialog")).toBeVisible();
+    await page.locator("#confirmDialogConfirm").click();
+
+    // Status kembali pending: tombol Setujui muncul lagi & badge Menunggu.
+    await expect(page.getByRole("button", { name: "Setujui" })).toBeVisible();
+    await expect(page.locator(".badge", { hasText: "Menunggu" })).toBeVisible();
+  });
+
+  test("admin menyelesaikan permintaan mengubah status jadi Selesai", async ({ page }) => {
+    const reqNumber = await seedRequestThenLoginAdmin(page);
+    await openAdminDetail(page, reqNumber);
+    await approveOpenRequest(page);
+
+    // Selesaikan permintaan (confirm dialog success) → status fulfilled.
+    await page.getByRole("button", { name: "Selesaikan Permintaan" }).click();
+    await expect(page.locator("#confirmDialog")).toBeVisible();
+    await page.locator("#confirmDialogConfirm").click();
+
+    await expect(page.locator(".badge", { hasText: "Selesai" })).toBeVisible();
   });
 });

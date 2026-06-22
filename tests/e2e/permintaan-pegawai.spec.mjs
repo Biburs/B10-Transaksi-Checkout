@@ -60,4 +60,20 @@ test.describe("Pegawai — Permintaan", () => {
     // Status tetap Menunggu (tombol Batalkan masih ada).
     await expect(page.getByRole("button", { name: "Batalkan" })).toBeVisible();
   });
+
+  test("mengedit permintaan menyimpan perubahan jumlah", async ({ page }) => {
+    const reqNumber = await createRequestAsPegawai(page);
+    await openDetailByNumber(page, reqNumber);
+
+    // Buka form edit dari halaman detail.
+    await page.getByRole("link", { name: "Edit" }).click();
+    await expect(page).toHaveURL(/\/edit$/);
+
+    // Ubah jumlah barang lalu simpan.
+    await page.fill('input[name="quantity"]', "7");
+    await page.getByRole("button", { name: "Simpan Perubahan" }).click();
+
+    // Redirect ke detail dengan banner sukses.
+    await expect(page.getByText("Permintaan berhasil diperbarui")).toBeVisible();
+  });
 });
