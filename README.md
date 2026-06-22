@@ -49,7 +49,7 @@ Total terdapat 18 fitur yang dibagi rata ke tiga anggota.
 1. Menyetujui atau menolak permintaan barang beserta alasannya
 2. Membatalkan keputusan (Approved/Rejected dikembalikan menjadi Pending)
 3. Memperbarui status permintaan menjadi selesai (Fulfilled)
-4. Mengunggah file tanda terima penyerahan barang (PDF/JPG/PNG, maksimal 5MB)
+4. Mengunggah file tanda terima penyerahan barang (PDF/Image, maksimal 5MB)
 5. Mencetak dokumen Surat Penyerahan Barang dalam format PDF
 6. Response API JSON untuk proses pembaruan status permintaan
 
