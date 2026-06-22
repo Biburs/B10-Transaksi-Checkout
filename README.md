@@ -69,7 +69,7 @@ Frontend:
 - Vanilla JavaScript
 
 Testing dan Deployment:
-- Playwright untuk E2E testing
+- Playwright untuk testing
 - Railway sebagai platform deployment
 
 ## Prasyarat
@@ -156,7 +156,7 @@ Aplikasi akan berjalan di `http://localhost:3000`. Login dengan akun seed yang s
 
 ## Testing
 
-Project ini menyertakan E2E test menggunakan Playwright. Sebelum menjalankan untuk pertama kali, install browser yang diperlukan:
+Project ini menyertakan test menggunakan Playwright. Sebelum menjalankan untuk pertama kali, install browser yang diperlukan:
 
 ```bash
 npx playwright install chromium
@@ -177,13 +177,13 @@ npx playwright show-report
 
 Cakupan test:
 
-| File                        | Jumlah Test | Yang Dicakup                                                     |
-|-----------------------------|-------------|------------------------------------------------------------------|
-| auth.spec.mjs               | 5           | Login admin, login pegawai, login gagal, logout, proteksi route  |
-| permintaan-pegawai.spec.mjs | 4           | Buat permintaan, status di list, cancel via dialog, tutup dialog |
-| permintaan-admin.spec.mjs   | 3           | List admin, approve, reject                                      |
+| File                        | Jumlah Test | Yang Dicakup                                                                      |
+|-----------------------------|-------------|-----------------------------------------------------------------------------------|
+| auth.spec.mjs               | 5           | Login admin, login pegawai, login gagal, logout, proteksi route                   |
+| permintaan-pegawai.spec.mjs | 5           | Buat permintaan, status di list, cancel via dialog, tutup dialog, edit permintaan |
+| permintaan-admin.spec.mjs   | 5           | List admin, approve, reject, cancel decision, complete                            |
 
-Total 12 test case. Testing dijalankan secara berurutan (workers=1) karena menulis data nyata ke database. Jangan jalankan terhadap database produksi.
+Total 15 test case. Testing dijalankan secara berurutan (workers=1) karena menulis data nyata ke database. Jangan jalankan terhadap database produksi.
 
 ## Struktur Folder
 
