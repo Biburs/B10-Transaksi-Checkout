@@ -60,11 +60,7 @@ typings/
 # next.js build output
 .next
 
-# Test Playwright (lokal saja, tidak dibagikan ke git)
-/tests/
-/playwright.config.js
-
-# Hasil generate Playwright
+# Hasil generate Playwright (bukan kode, jangan di-commit)
 /test-results/
 /playwright-report/
 /playwright/.cache/
